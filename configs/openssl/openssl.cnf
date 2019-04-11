@@ -1,0 +1,45 @@
+[ req ]
+default_md = sha1
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]
+countryName = Country
+countryName_default = IT
+countryName_min = 2
+countryName_max = 2
+localityName = Locality Name (eg, city)
+localityName_default = Rome
+stateOrProvinceName = State or Province Name (full name)
+stateOrProvinceName_default = Italy
+organizationName = Organization
+organizationName_default = Antonio Musarra\'s Blog
+organizationalUnitName = Organizational Unit Name (eg, section)
+commonName = Common Name
+commonName_default = Antonio Musarra\'s Blog Certification Authority
+commonName_max = 64
+emailAddress = Email Address
+emailAddress_default = info@dontesta.it
+emailAddress_max = 100
+
+[ certauth ]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints = CA:true
+crlDistributionPoints = @crl
+
+[ server ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+nsCertType = server
+crlDistributionPoints = @crl
+
+[ client ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment, dataEncipherment
+extendedKeyUsage = clientAuth
+nsCertType = client
+crlDistributionPoints = @crl
+
+[ crl ]
+URI=http://ca.dontesta.it/ca.crl
