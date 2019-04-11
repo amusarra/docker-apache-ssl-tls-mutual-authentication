@@ -80,7 +80,7 @@
                 <p class="mbr-text pb-3 mbr-fonts-style display-7">Certificate verification: <?= getenv('SSL_CLIENT_VERIFY')?></p>
                 <p class="mbr-text pb-3 mbr-fonts-style display-7">Validity of the certificate: from <?= getenv('SSL_CLIENT_V_START')?> to <?= getenv('SSL_CLIENT_V_END')?></p>
                 <div class="mbr-section-btn">
-                    <a class="btn btn-md btn-primary display-4" href="https://github.com/italia/cie-cns-apache-docker">GO TO THE PROJECT</a>
+                    <a class="btn btn-md btn-primary display-4" href="https://github.com/amusarra/docker-apache-ssl-tls-mutual-authentication">GO TO THE PROJECT</a>
                     <a class="btn btn-md btn-danger display-4" href="#" data-toggle="modal" data-target="#exampleModalButton">CERTIFICATE DETAILS</a>
                 </div>
             </div>
