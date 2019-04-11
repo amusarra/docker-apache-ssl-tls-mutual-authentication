@@ -50,9 +50,11 @@ COPY configs/httpd/ssl-params.conf /etc/apache2/conf-available/
 COPY configs/httpd/dir.conf /etc/apache2/mods-enabled/
 COPY configs/httpd/ports.conf /etc/apache2/
 
-# Copy Server (pub and key) cns.dontesta.it
-COPY configs/certs/*.cer /etc/ssl/certs/
-COPY configs/certs/*.key /etc/ssl/private/
+# Copy Server (pub and key) tls-auth.dontesta.it
+# Copy CA Public Key
+COPY configs/certs/blog.dontesta.it.ca.cer /etc/ssl/certs/
+COPY configs/certs/tls-auth.dontesta.it.cer /etc/ssl/certs/
+COPY configs/certs/tls-auth.dontesta.it.key /etc/ssl/private/
 
 # Copy php samples script and other
 COPY configs/www/*.php /var/www/html/

@@ -1,48 +1,18 @@
-# Apache HTTP 2.4 per Smart Card TS-CNS (Tessera Sanitaria - Carta Nazionale Servizi) e CIE (Carta d'Identità Elettronica)
+# Apache HTTP 2.4 - Docker image for SSL/TLS Mutual Authentication
 [![Antonio Musarra's Blog](https://img.shields.io/badge/maintainer-Antonio_Musarra's_Blog-purple.svg?colorB=6e60cc)](https://www.dontesta.it)
-[![Build Status](https://travis-ci.org/italia/cie-cns-apache-docker.svg?branch=master)](https://travis-ci.org/italia/cie-cns-apache-docker)
-[![](https://images.microbadger.com/badges/image/italia/cie-cns-apache-docker:1.3.3.svg)](https://microbadger.com/images/italia/cie-cns-apache-docker:1.3.3 "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/italia/cie-cns-apache-docker:1.3.3.svg)](https://microbadger.com/images/italia/cie-cns-apache-docker:1.3.3 "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/commit/italia/cie-cns-apache-docker:1.3.3.svg)](https://microbadger.com/images/italia/cie-cns-apache-docker:1.3.3 "Get your own commit badge on microbadger.com")
+[![Build Status](https://travis-ci.org/amusarra/docker-apache-ssl-tls-mutual-authentication.svg?branch=master)](https://travis-ci.org/amusarra/docker-apache-ssl-tls-mutual-authentication)
+[![](https://images.microbadger.com/badges/image/amusarra/apache-ssl-tls-mutual-authentication:1.0.0.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication:1.0.0 "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/amusarra/apache-ssl-tls-mutual-authentication:1.0.0.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication:1.0.0 "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/commit/amusarra/apache-ssl-tls-mutual-authentication:1.0.0.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication:1.0.0 "Get your own commit badge on microbadger.com")
 [![Twitter Follow](https://img.shields.io/twitter/follow/antonio_musarra.svg?style=social&label=%40antonio_musarra%20on%20Twitter&style=plastic)](https://twitter.com/antonio_musarra)
 
 L'obiettivo di questo progetto è quello di fornire un **template** pronto all'uso
-che realizza un sistema di autenticazione tramite la Smart Card **TS-CNS** (o CNS)
-e la **CIE** (Carta d'Identità Elettronica) basato su [Apache HTTP](http://httpd.apache.org/docs/2.4/). 
-**Ognuno può poi modificare o specializzare questo progetto sulla base delle proprie esigenze**
-
-Si tratta di un progetto [docker](https://www.docker.com/) per la creazione di 
-un container che implementa un sistema di **mutua autenticazione o autenticazione bilaterale SSL/TLS**.
-Questo meccanismo di autenticazione richiede anche il certificato digitale 
-da parte del client, certificato che in questo caso risiede all'interno della TS-CNS
-o della CIE.
-
-La particolarità del sistema implementato (attraverso questo container) è quella 
-di consentire l'autenticazione tramite:
-
-1. La **TS-CNS (Tessera Sanitaria - Carta Nazionale Servizi)**, rilasciata dalla 
-regione di appartenenza;
-2. La **CIE (Carta d'Identità Elettronica)**, rilasciata dal comune di residenza.
-
-Per la Regione Lazio il portale di riferimento per la TS-CNS è https://cns.regione.lazio.it/. 
-Ogni regione ha il proprio portale dedicato alla TS-CNS dov'è possibile trovare 
-tutte le informazioni utili.
-
-La maggior parte dei comuni d'Italia è abilitato al rilascio della CIE.
-La pagina [La Carta d'identità elettronica nei Comuni d’Italia](https://www.cartaidentita.interno.gov.it/la-carta-identita-nei-comuni-ditalia/)
-del Ministero dell'Interno mostra il dettaglio di quali sono i comuni abilitati. 
-
-Sul sito dell'Agenzia per l'Italia digitale (AgID) nella sezione [Piattaforme/Carta Nazionale Servizi](https://www.agid.gov.it/it/piattaforme/carta-nazionale-servizi), sono disponibili
-tutti i documenti tecnici da consultare per eventuali approfondimenti.
-
-Sul sito del Ministero dell'Interno dedicato alla CIE, il documento [Carta d'Identità Elettronica CIE 3.0](https://www.cartaidentita.interno.gov.it/wp-content/uploads/2016/07/cie_3.0_-_specifiche_chip.pdf) descrive
-la CIE dal punto di vista prettamente tecnico e in modo approfondito.
- 
+e che realizza un sistema di **mutua autenticazione o autenticazione bilaterale SSL/TLS** 
+basato su [Apache HTTP](http://httpd.apache.org/docs/2.4/). 
+**Ognuno è libero poi di modificare o specializzare questo progetto sulla base delle proprie esigenze**
 
 ## 1 - Overview
-Questo container parte dall'immagine base di [*ubuntu:18.04*](https://hub.docker.com/_/ubuntu), 
-poi specializzato al fine di soddisfare i requisiti minimi per un sistema di 
-autenticazione basato sulla TS-CNS.
+Questo è un progetto [docker](https://www.docker.com/) che parte dall'immagine base di [*ubuntu:18.04*](https://hub.docker.com/_/ubuntu), specializzato per soddisfare i requisiti minimi per un sistema di mutua autenticazione SSL/TLS.
 
 Il software di base installato è:
 
@@ -52,8 +22,31 @@ Il software di base installato è:
 
 _L'installazione di PHP e del modulo per Apache è del tutto opzionale_. I due 
 moduli sono stati installati esclusivamente per costruire la pagina di atterraggio
-dell'utente dopo la fase di autenticazione. Questa pagina mostra le informazioni
-estratte dal certificato digitale.
+dell'utente dopo la fase di autenticazione. Questa pagina mostra una serie d'informazioni
+base estratte dal certificato digitale utilizzato per l'autenticazione.
+
+La mutua autenticazione basata sul protocollo SSL/TLS si riferisce a due parti che si autenticano
+reciprocamente attraverso la verifica del certificato digitale fornito in modo che entrambe i 
+partecipanti siano sicuri dell'identità altrui.
+
+Da un punto di vista di alto livello, il processo di autenticazione e creazione di un canale 
+crittografato utilizzando l'autenticazione reciproca (o mutua autenticazione) basata su certificati 
+prevede i passaggi seguenti:
+
+1. Un client richiede l'accesso a una risorsa protetta;
+2. Il server presenta il suo certificato al client;
+3. Il client verifica il certificato del server;
+4. Se ha successo, il client invia il suo certificato al server;
+5. Il server verifica le credenziali del cliente;
+6. In caso di esito positivo, il server concede l'accesso alla risorsa protetta richiesta dal client.
+
+In Figura 1 è mostrato quello che accade durante il processo di autenticazione reciproca (o
+mutua autenticazione).
+
+![Cosa succede durante il processo di autenticazione reciproca](images/security-sslBMAWithCertificates.gif)
+
+**Figura 1 - Cosa succede durante il processo di autenticazione reciproca (immagine da https://docs.oracle.com)**
+
 
 ## 2 - Struttura del Docker File
 Cerchiamo di capire quali sono le sezioni più significative del Dockefile. 
@@ -70,10 +63,12 @@ essere modificate in base alle proprie esigenze.
 
 ```docker
 # Apache ENVs
-ENV APACHE_SERVER_NAME cns.dontesta.it
-ENV APACHE_SERVER_ADMIN cns@dontesta.it
-ENV APACHE_SSL_CERTS cns-dontesta-it_crt.pem
-ENV APACHE_SSL_PRIVATE cns-dontesta-it_key.pem
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_SERVER_NAME tls-auth.dontesta.it
+ENV APACHE_SERVER_ADMIN tls-auth@dontesta.it
+ENV APACHE_SSL_CERTS tls-auth.dontesta.it.cer 
+ENV APACHE_SSL_PRIVATE tls-auth.dontesta.it.key
 ENV APACHE_SSL_PORT 10443
 ENV APACHE_LOG_LEVEL info
 ENV APACHE_SSL_LOG_LEVEL info
@@ -82,20 +77,15 @@ ENV APPLICATION_URL https://${APACHE_SERVER_NAME}:${APACHE_SSL_PORT}
 ENV CLIENT_VERIFY_LANDING_PAGE /error.php
 ```
 
-Le prime due variabili sono molto esplicative, la prima in particolare,
-imposta il server name, che in questo caso è: cns.dontesta.it.
-
-Le due variabili `APACHE_SSL_CERTS` e `APACHE_SSL_PRIVATE` impostano:
+Il primo gruppo delle quattro variabili sono molto esplicative e non necessitano approfondimenti.
+Le variabili a seguire e in particolare `APACHE_SSL_CERTS` e `APACHE_SSL_PRIVATE` impostano:
 
 1. il nome del file che contiene il certificato pubblico del server in formato PEM;
 2. il nome del file che contiene la chiave privata (in formato PEM) del certificato pubblico.
 
-Il certificato utilizzato in questo progetto è stato rilasciato da 
-[Let's Encrypt](https://letsencrypt.org/) e richiesto tramite il servizio offerto
-da [ZeroSSL](https://zerossl.com).
-
-Il CN di questo specifico certificato è impostato a *cns.dontesta.it*. La 
-scadenza prevista per questo certificato è il 13 marzo 2019.
+Il certificato server utilizzato in questo progetto è stato rilasciato da una
+_Certification Authority_ privata (non riconosciuta). Il CN (Common Name) di questo specifico certificato 
+è impostato a **tls-auth.dontesta.it**.
 
 Di default la porta *HTTPS* è impostata a **10443** dalla variabile `APACHE_SSL_PORT`.
 La variabile `APPLICATION_URL` definisce il path di redirect qualora si accedesse 
@@ -109,51 +99,17 @@ il livello log generale e quello specifico per il modulo SSL. Il valore di defau
 La variabile `APACHE_SSL_VERIFY_CLIENT` agisce sulla configurazione del processo
 di verifica del certificato lato client. Il valore di default è impostato a **optional**.
 Rendere opzionale la verifica, consente una gestione più flessibile dell'errore 
-in caso che la validazione fallisse.
+in caso che la validazione del certificato client fallisse.
 
 Nel caso in cui il valore della direttiva di Apache **SSLVerifyClient** sia 
-optional o optional_no_ca, in caso di errore viene visualizzata una specifica
-pagina di errore definita dalla variabile `CLIENT_VERIFY_LANDING_PAGE`.
-
-A seguire c'è la sezione delle variabili di ambiente che sono prettamente 
-specifiche per lo script di download dei certificati pubblici degli enti. Questi enti,
-sono autorizzati dallo stato Italiano al rilascio di certificati digitali 
-per il cittadino e le aziende.
-
-La variabile d'ambiente `GOV_TRUST_CERTS_SERVICE_TYPE_IDENTIFIER` applica il filtro
-sul **Service Type Identifier**, il cui valore assunto nel caso della CNS e CIE è
-http://uri.etsi.org/TrstSvc/Svctype/IdV
-
-```docker
-# Env for Trusted CA certificate
-ENV GOV_TRUST_CERTS_DOWNLOAD_SCRIPT_URL https://raw.githubusercontent.com/italia/apache-httpd-ts-cns-docker/master/scripts/parse-gov-certs.py
-ENV GOV_TRUST_CERTS_OUTPUT_PATH /tmp/gov/trust/certs
-ENV GOV_TRUST_CERTS_SERVICE_TYPE_IDENTIFIER http://uri.etsi.org/TrstSvc/Svctype/IdV
-```
-
-A seguire un estratto dalla **Trust Service Status List** dov'è riportato il valore
-dell'elemento _ServiceTypeIdentifier_.
-
-```xml
-<ServiceInformation>
-<ServiceTypeIdentifier>http://uri.etsi.org/TrstSvc/Svctype/IdV</ServiceTypeIdentifier>
-<ServiceName>
-<Name xml:lang="en">CN=Provincia autonoma Bolzano - CA Cittadini, OU=Servizi di Certificazione, O=Actalis S.p.A., C=IT</Name>
-</ServiceName>
-<ServiceDigitalIdentity>
-<DigitalId>
-<X509Certificate>...</X509Certificate>
-</DigitalId>
-</ServiceDigitalIdentity>
-<ServiceStatus>http://uri.etsi.org/TrstSvc/TrustedList/Svcstatus/recognisedatnationallevel</ServiceStatus>
-<StatusStartingTime>2016-06-30T22:00:00Z</StatusStartingTime>
-</ServiceInformation>
-```
+**optional** o **optional_no_ca**, se dovesse accadere qualche errore di validazione,
+allora sarebbe visualizzata la specifica pagina definita dalla variabile 
+`CLIENT_VERIFY_LANDING_PAGE`.
 
 La sezione a seguire del Dockerfile, contiene tutte le direttive necessarie per 
-l'installazione del software indicato in precedenza. Dato che la 
-distribuzione scelta è [**Ubuntu**](https://www.ubuntu.com/), il comando *apt* è
-responsabile della gestione dei package, quindi dell'installazione.
+l'installazione del software indicato in precedenza. Dato che la  distribuzione scelta 
+è [**Ubuntu**](https://www.ubuntu.com/), il comando *apt* è responsabile della gestione 
+dei package, quindi dell'installazione.
 
 ```docker
 # Install services, packages and do cleanup
@@ -164,30 +120,10 @@ RUN apt update \
     && apt install -y python \
     && rm -rf /var/lib/apt/lists/*
 ```
-
-L'installazione di cURL è necessaria per scaricare lo script `parse-gov-certs.py`,
-mentre python per eseguire lo script. La sezione a seguire scarica e copia tutti
-i certificati pubblici degli enti che sono autorizzati dallo stato Italiano al 
-rilascio di certificati digitali per il cittadino e le aziende.
-
-Il punto di distribuzione dei certificati (chiamato [Trust Service Status List](http://uri.etsi.org/02231/v3.1.2/)) 
-è gestito dall'[Agenzia per l'Italia Digitale o AgID](https://www.agid.gov.it/) e 
-raggiungibile al seguente URL https://eidas.agid.gov.it/TL/TSL-IT.xml
-
-
-```docker
-# Download Trusted CA certificate and copy to ssl system path
-RUN rm -rf ${GOV_TRUST_CERTS_OUTPUT_PATH} \
-    && curl ${GOV_TRUST_CERTS_DOWNLOAD_SCRIPT_URL} \
-    | python /dev/stdin --output-folder ${GOV_TRUST_CERTS_OUTPUT_PATH} \
-    --service-type-identifier ${GOV_TRUST_CERTS_SERVICE_TYPE_IDENTIFIER} \
-    && cp ${GOV_TRUST_CERTS_OUTPUT_PATH}/*.pem /etc/ssl/certs/
-```
  
 La sezione a seguire del Dockerfile, anch'essa esplicativa, copia le 
 configurazioni di Apache opportunamente modificate al fine di abilitare 
 la mutua autenticazione.
-
 
 ```docker
 # Copy Apache configuration file
@@ -198,58 +134,43 @@ COPY configs/httpd/dir.conf /etc/apache2/mods-enabled/
 COPY configs/httpd/ports.conf /etc/apache2/
 ```
 
-La sezione a seguire del Dockerfile, copia il certificato pubblico e la relativa 
-chiave privata.
+La sezione a seguire del Dockerfile, copia la coppia di chiavi del server 
+e il certificato pubblico della CA.
 
 ```docker
-# Copy Server (pub and key) cns.dontesta.it
-COPY configs/certs/*_crt.pem /etc/ssl/certs/
-COPY configs/certs/*_key.pem /etc/ssl/private/
+# Copy Server (pub and key) tls-auth.dontesta.it
+# Copy CA (Certification Authority) Public Key
+COPY configs/certs/blog.dontesta.it.ca.cer /etc/ssl/certs/
+COPY configs/certs/tls-auth.dontesta.it.cer /etc/ssl/certs/
+COPY configs/certs/tls-auth.dontesta.it.key /etc/ssl/private/
 ``` 
 
 La sezione a seguire del Dockerfile, copia tre script PHP a scopo di test sulla 
 *document root* standard di Apache.
 
 ```docker
-# Copy phpinfo test script
-COPY configs/test/*.php /var/www/html/
+# Copy php samples script and other
+COPY configs/www/*.php /var/www/html/
+COPY configs/www/assets /var/www/html/assets
+COPY configs/www/secure /var/www/html/secure
 COPY images/favicon.ico /var/www/html/favicon.ico
 ```
 
-La sezione a seguire del Dockerfile, copia gli script necessari attivare il cron
-e consentire l'aggiornamento dei certificati della CNS una volta al giorno.
+La sezione a seguire del Dockerfile copia lo script di entrypoint che avvia
+server Apache HTTP.
 
 ```docker
-# Copy auto-update-gov-certificates scripts and entrypoint
-COPY scripts/auto-update-gov-certificates /auto-update-gov-certificates
+# Copy scripts and entrypoint
 COPY scripts/entrypoint /entrypoint
 ```
-
-La sezione a seguire del Dockerfile, esegue una serie di comandi con l'obiettivo
-finale di abilitare l'aggiornamento dei certificati della CNS e CIE.
-
-```docker
-# Set execute flag for entrypoint and crontab entry
-# Add Cron entry auto-update-gov-certificates
-# Create Project ENV for crontab
-RUN chmod +x /entrypoint \
-    && chmod +x /auto-update-gov-certificates \
-    && echo "30 23 * * * root . /project_env.sh; /auto-update-gov-certificates >> /var/log/cron.log 2>&1" > /etc/cron.d/auto-update-gov-certificates \
-    && printenv | sed 's/^\(.*\)$/export \1/g' | grep -E "APACHE_|APPLICATION_URL|GOV_" > /project_env.sh \
-    && chmod +x /project_env.sh
-```
-L'aggiornamento dei certificati avviene una volta al giorno alle ore 23:30. L'esecuzione
-dello script di aggiornamento produce i due file di log cron.log e auto-update-gov-certificates.log.
-Entrambe i file di log risiedono all'interno del folder /var/log.
 
 La sezione a seguire del Dockerfile esegue le seguenti attività:
 
 1. abilita il modulo SSL
 2. abilita il modulo headers
-3. abilita il site ssl di default con la configurazione per la TS-CNS e CIE
+3. abilita il site ssl di default con la configurazione per la mutua autenticazione
 4. abilita delle opzioni di configurazione al fine di rafforzare la sicurezza SSL/TLS
 5. esegue il re-hash dei certificati. Operazione necessaria affinché Apache sia in grado di leggere i nuovi certificati
-
 
 ```docker
 RUN a2enmod ssl \
@@ -264,184 +185,101 @@ Le due ultime direttive indicate sul Dockerfile, dichiarano la porta HTTPS
 (`APACHE_SSL_PORT`) che deve essere pubblicata e il comando da eseguire per mettere 
 in listen (o ascolto) il nuovo servizio Apache HTTP.
 
-## 3 - Qualche nota su OCSP
-Il protocollo **OCSP (Online Certificate Status Protocol)** definito dall'[RFC 2560](https://www.ietf.org/rfc/rfc2560.txt) 
-è un meccanismo per determinare se un certificato del server è stato revocato o meno. 
-Questo protocollo è stato creato in alternativa al **CRL (Certificate Revocation List)** 
-
-L'**OCSP Stapling** è una "forma speciale" di protocollo, in cui il server, 
-mantiene le risposte OCSP correnti per i suoi certificati e li invia ai client 
-che comunicano con il server.
-
-La maggior parte dei certificati contiene l'indirizzo di un risponditore OCSP 
-gestito dall'autorità di certificazione emittente, **mod_ssl** può comunicare con 
-tale risponditore per ottenere una risposta firmata che può essere inviata ai 
-client che comunicano con il server.
-
-Poiché il client può ottenere lo stato di revoca del certificato dal server, 
-senza richiedere una connessione aggiuntiva dal client all'autorità di certificazione, 
-il metodo OCSP Stapling, è il modo preferito per ottenere lo stato di revoca. 
-
-Altri vantaggi dell'eliminazione della comunicazione tra i client e l'autorità 
-di certificazione sono che la cronologia di navigazione del client non è esposta 
-all'autorità di certificazione e lo stato di ottenimento è più affidabile 
-non dipendendo da server di autorità di certificazione potenzialmente 
-pesantemente caricati.
-
-Poiché la risposta ottenuta dal server può essere riutilizzata per tutti i 
-client che utilizzano lo stesso certificato durante il tempo in cui la 
-risposta è valida, il sovraccarico per il server è minimo.
-
-Una volta che il supporto SSL è stato configurato correttamente, abilitare 
-l'OCSP Stapling generalmente richiede solo modifiche molto minori alla 
-configurazione httpd.
-
-A seguire la configurazione dell'OCSP Stapling applicata in questo progetto.
-
-```
-SSLUseStapling on
-SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
-```
-
-È possibile utilizzare due metodi per verificare se l'OCSP Stapling funziona: 
-utilizzando il comando `openssl` e il test [SSL su Qualys](https://www.ssllabs.com/ssltest/).
-
-```bash
-echo QUIT | openssl s_client -connect cns.dontesta.it:443 -status 2> /dev/null | grep -A 17 'OCSP response:' | grep -B 17 'Next Update'
-```
-Risposta OCSP per il certificato del server cns.dontesta.it
-
-```
-OCSP response:
-======================================
-OCSP Response Data:
-    OCSP Response Status: successful (0x0)
-    Response Type: Basic OCSP Response
-    Version: 1 (0x0)
-    Responder Id: C = US, O = Let's Encrypt, CN = Let's Encrypt Authority X3
-    Produced At: Jan  9 10:22:00 2019 GMT
-    Responses:
-    Certificate ID:
-      Hash Algorithm: sha1
-      Issuer Name Hash: 7EE66AE7729AB3FCF8A220646C16A12D6071085D
-      Issuer Key Hash: A84A6A63047DDDBAE6D139B7A64565EFF3A8ECA1
-      Serial Number: 04EC8E170AD76F242AC72AD5F2767801B1C0
-    Cert Status: good
-    This Update: Jan  9 10:00:00 2019 GMT
-    Next Update: Jan 16 10:00:00 2019 GMT
-```
-
-A seguire l'estratto del test eseguito su https://cns.dontesta.it tramite
-[SSL Labs Qualys](https://www.ssllabs.com/ssltest/analyze.html?d=cns.dontesta.it) dove si evidenzia
-l'abilitazione dell'OCSP Stapling.
-
-![SSL Labs Qualys](images/SSLLABS_CNS_DONTESTA_IT.png)
-
-**Evidenza dell'abilitazione dell'OCSP Stapling**
-
-Il protocollo CRL richiede al browser di scaricare quantità potenzialmente elevate 
-di'informazioni di revoca del certificato SSL: numeri di serie del certificato e 
-stato dell'ultima data di pubblicazione di ciascun certificato. Il problema con 
-il protocollo CRL è che può aumentare il tempo impiegato per completare la 
-negoziazione SSL.
-
-### - Vantaggi
-
-OCSP ha alcuni vantaggi rispetto alle CRL:
-
-1. Elimina la necessità per i client di scaricare e analizzare le liste di revoca.
-2. Provvede ad un migliore utilizzo della banda: dal momento che un messaggio OCSP ha una dimensione trascurabile rispetto alle CRL.
-3. Supporta una catena fidata di OCSP richiesta tra i vari responder. Questo permette ai clienti di comunicare con un responder fidato per interrogare un altro responder.
-3. OCSP è più efficiente delle CRL e quindi scala in modo migliore.
-
-### - Svantaggi
-OCSP ha anche alcuni svantaggi rispetto alle CRL:
-
-1. Per ogni revoca è necessario fare una richiesta al responder, se il responder non risponde entro un timeout OCSP verrà ignorato silenziosamente.
-2. Ogni richiesta deve essere analizzata dal responder, di fatto si passa la cronologia di navigazione al responder, questo è un evidente problema di privacy.
-
-Consiglio la lettura della documentazione su [OCSP Stapling](http://httpd.apache.org/docs/2.4/ssl/ssl_howto.html#ocspstapling) per maggiori 
-informazioni sulla configurazione e le pratiche migliori d'utilizzo.
-
-## 4 - Organizzazione
+## 3 - Organizzazione
 In termini di directory e file, il progetto è organizzato così come mostrato a 
-seguire. Il cuore di tutto è il folder **configs**.
+seguire. Il cuore di tutto è la directory **configs**.
 
 ```
 ├── Dockerfile
 ├── configs
 │    ├── certs
-│    │   ├── cns-dontesta-it_crt.pem
-│    │   └── cns-dontesta-it_key.pem
+│    │   ├── blog.dontesta.it.ca.cer
+│    │   ├── blog.dontesta.it.ca.key
+|    |   ├── tls-auth.dontesta.it.cer
+|    |   ├── tls-auth.dontesta.it.key
+|    |   ├── tls-auth.dontesta.it.req
+|    |   ├── tls-client.dontesta.it.cer
+|    |   ├── tls-client.dontesta.it.key
+|    |   ├── tls-client.dontesta.it.p12
+|    |   ├── tls-client.dontesta.it.req
+|    |   ├── mrossi.dontesta.it.cer
+|    |   ├── mrossi.dontesta.it.key
+|    |   ├── mrossi.dontesta.it.p12
+|    |   ├── mrossi.dontesta.it.req
 │    ├── httpd
 │    │   ├── 000-default.conf
 │    │   ├── default-ssl.conf
 │    │   ├── dir.conf
 │    │   ├── ports.conf
 │    │   └── ssl-params.conf
+│    ├── openssl
+│    │   └── openssl.cnf
 │    └── wwww
 └── scripts
-    ├── auto-update-gov-certificates
-    ├── parse-gov-certs.py
     └── entrypoint
 ```
 
-Il folder *configs* contiene al suo interno altri folder e file, in particolare:
+La directory *configs* contiene al suo interno altre folder e file, in particolare:
 
 1. **certs**
-    * contiene il certificato del server (chiave pubblica e chiave privata);
-2. **httpd**: contiene tutte le configurazioni di Apache necessarie per attivare l'autenticazione tramite la Smart Card TS-CNS e CIE;
-3. **www**: contiene gli script PHP di test;
-4. **scripts**: contiene gli scripts di aggiornamento certificati e abiliatazione del servizio cron
+    * contiene il certificato del server (chiave pubblica, chiave privata e CSR);
+    * contiene il certificato della CA (chiave pubblica e chiave privata);
+    * contiene il certificato client personale per l'autenticazione tramite browser. Sono disponibili: chiave pubblica, chiave privata, CSR, coppia di chiavi in formato PKCS#12;
+    * contiene il certificato client da utilizzare per autenticare un applicazione o dispositivo. Sono disponibili: chiave pubblica, chiave privata, CSR, coppia di chiavi in formato PKCS#12;
+2. **openssl**: contiene il file di configurazione per il tool openssl;
+3. **httpd**: contiene tutte le configurazioni di Apache necessarie per abilitare la mutua autenticazione;
+4. **www**: contiene una semplice interfaccia web;
+5. **scripts**: contiene l'entrypoint script che avvia il server Apache
 
-## 5 - Quickstart
+## 4 - Quickstart
 L'immagine di questo progetto docker è disponibile sull'account docker hub
-[italia/cie-cns-apache-docker](https://hub.docker.com/r/italia/cie-cns-apache-docker).
+[amusarra/apache-ssl-tls-mutual-authentication](https://hub.docker.com/r/amusarra/apache-ssl-tls-mutual-authentication).
 
-A seguire il comando per il pull dell'immagine docker su docker hub. Il primo comando 
+A seguire il comando per il pull dell'immagine docker ospitata su docker hub. Il primo comando 
 esegue il pull dell'ultima versione (tag latest), mentre il secondo comando esegue 
-il pull della specifica versione dell'immagine, in questo caso la versione 1.3.3.
+il pull della specifica versione dell'immagine, in questo caso la versione 1.0.0.
 
 ```bash
-docker pull italia/cie-cns-apache-docker
-docker pull italia/cie-cns-apache-docker:1.3.3
+docker pull amusarra/apache-ssl-tls-mutual-authentication
+docker pull amusarra/apache-ssl-tls-mutual-authentication:1.0.0
 ```
-Una volta eseguito il pull dell'immagine docker (versione 1.3.3) è possibile creare il nuovo
+Una volta eseguito il pull dell'immagine docker (versione 1.0.0) è possibile creare il nuovo
 container tramite il comando a seguire.
 
 ```bash
-docker run -i -t -d -p 10443:10443 --name=cie-cns italia/cie-cns-apache-docker:1.3.3
+docker run -i -t -d -p 10443:10443 --name=apache-ssl-tls-mutual-authentication amusarra/apache-ssl-tls-mutual-authentication:1.0.0
 ```
 Utilizzando il comando `docker ps` dovremmo poter vedere in lista il nuovo
 container, così come indicato a seguire.
 
 ```bash
 CONTAINER ID        IMAGE                                  COMMAND                  CREATED             STATUS              PORTS                      NAMES
-bb707fb00e89        italia/cie-cns-apache-docker:1.3.3   "/usr/sbin/apache2ct…"   6 seconds ago       Up 4 seconds        0.0.0.0:10443->10443/tcp   cie-cns
+bb707fb00e89        amusarra/apache-ssl-tls-mutual-authentication:1.0.0   "/usr/sbin/apache2ct…"   6 seconds ago       Up 4 seconds        0.0.0.0:10443->10443/tcp   apache-ssl-tls-mutual-authentication
 ```
 
-Nel caso in cui vogliate apportare delle modifiche, dovreste poi procedere con 
-la build della nuova immagine e al termine della build lanciare l'immagine ottenuta. 
-A seguire sono indicati i comandi *docker* da lanciare dal proprio terminale.
+Nel caso in cui vogliate apportare delle modifiche dovreste poi procedere con 
+la build della nuova immagine e al termine lanciare l'immagine ottenuta. 
+A seguire sono indicati i comandi *docker* da eseguire dal proprio terminale.
 
-_I comandi docker di build e run devono essere lanciati dalla root della directory 
+_I comandi docker di build e run devono essere eseguiti dalla root della directory 
 di progetto dopo aver fatto il clone di questo repository._
 
 ```bash
-docker build -t cie-cns-apache-docker .
-docker run -i -t -d -p 10443:10443 --name=cie-cns cie-cns-apache-docker:latest
+docker build -t apache-ssl-tls-mutual-authentication .
+docker run -i -t -d -p 10443:10443 --name=apache-ssl-tls-mutual-authentication apache-ssl-tls-mutual-authentication:latest
 ```
 
 A questo punto sul nostro sistema dovremmo avere la nuova immagine con il 
-nome **cie-cns-apache-docker** e in esecuzione il nuovo container chiamato
-**cie-cns**. 
+nome **apache-ssl-tls-mutual-authentication** e in esecuzione il nuovo container chiamato
+**apache-ssl-tls-mutual-authentication**. Per ragioni di comodità ho chiamato il container
+con lo stesso nome dell'immagine, nessun però vieta di assegnare un nome diverso. 
 
 Utilizzando il comando `docker images` dovremmo poter vedere in lista la nuova
 immagine, così come indicato a seguire.
 
 ```
 REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
-cie-cns-apache-docker                           latest              1a145475d1f1        30 minutes ago      208MB
+apache-ssl-tls-mutual-authentication                           latest              1a145475d1f1        30 minutes ago      242MB
 ```
 
 Utilizzando il comando `docker ps` dovremmo poter vedere in lista il nuovo
@@ -449,130 +287,107 @@ container, così come indicato a seguire.
 
 ```
 CONTAINER ID        IMAGE                          COMMAND                  CREATED             STATUS              PORTS                      NAMES
-65c874216624        cie-cns-apache-docker:latest   "/usr/sbin/apache2ct…"   36 minutes ago      Up 36 minutes       0.0.0.0:10443->10443/tcp   cie-cns
+65c874216624        apache-ssl-tls-mutual-authentication:latest   "/usr/sbin/apache2ct…"   36 minutes ago      Up 36 minutes       0.0.0.0:10443->10443/tcp   apache-ssl-tls-mutual-authentication
 ```
 
-Da questo momento è possibile raggiungere il servizio di autenticazione basato
-sulla TS-CNS e CIE utilizzando il browser. 
+Da questo momento è possibile raggiungere il servizio di mutua autenticazione SSL/TLS 
+utilizzando il browser. 
 
-Per evitare l'errore `SSL_ERROR_BAD_CERT_DOMAIN` da parte del browser, raggiungendo 
-il servizio tramite la URL https://127.0.0.1:10443/, bisogna aggiungere al proprio
+Per evitare l'errore `SSL_ERROR_BAD_CERT_DOMAIN` da parte del browser accedendo 
+al servizio tramite la URL https://127.0.0.1:10443/, bisogna aggiungere al proprio
 file di _hosts_ la riga a seguire.
 
 ```
 ##
-# Servizio di autenticazione via TS-CNS
+# Servizio di mutua autenticazione via Apache HTTPD
 ##
-127.0.0.1       cns.dontesta.it
+127.0.0.1       tls-auth.dontesta.it
 ```
 
 In ambiente di collaudo e/o produzione il nome del servizio o FQDN sarà registrato 
 su un DNS.
 
-Lato **server-side** è tutto pronto, non resta fare altro che un test. 
-Nel caso disponiate di una vostra Smart Card TS-CNS o CIE e il vostro PC già 
-configurato per l'utilizzo, potreste eseguire da subito un test puntando il 
-vostro browser alla URL https://cns.dontesta.it:10443/
+Lato **server-side** è tutto pronto, manca però una configurazione **client side**,
+ovvero, l'installazione del certificato digitale personale sul proprio browser. All'interno
+del progetto ho reso disponibili due certificati di esempio che possono essere utilizzati
+come certificati client, in particolare:
 
-Puntando all'indirizzo https://cns.dontesta.it:10443/ dovrebbe accadere quanto 
-segue:
+1. mrossi.dontesta.it.p12
+2. tls-client.dontesta.it.p12
 
-1. Richiesta del PIN CODE della vostra TS-CNS o CIE;
-2. Richiesta di selezione del vostro certificato digitale;
+Il primo è un certificato digitale _personale_, invece, il secondo certificato digitale può
+essere utilizzato per autenticare un'applicazione. Entrambe i certificati (quindi la coppia 
+di chiavi) sono contenuti all'interno di un PKCS#12. A seguire sono mostrati i subject dei
+rispettivi certificati.
+
+```
+Subject: C=IT, L=Rome, ST=Italy, O=Mario Rossi S.r.l, OU=Horse Club, CN=mario.rossi@horseclubsample.com/emailAddress=admin@horseclubsample.com
+
+Subject: C=IT, L=Bronte, ST=Italy, O=Judio Horse Club, OU=IT Services, CN=tls-client.dontesta.it/emailAddress=info@dontesta.it
+```
+I due certificati sono stati rilasciati dalla Certification Authority **Antonio Musarra's Blog**. A seguire
+i dettagli.
+
+```
+Issuer: C=IT, L=Rome, ST=Italy, O=Antonio Musarra's Blog, OU=IT Security Department, CN=Antonio Musarra's Blog Certification Authority/emailAddress=info@dontesta.it
+```
+Una volta installato il certificato client (file con estensione .p12) sul proprio 
+browser (per esempio Firefox), è possibile eseguire il test di autenticazione 
+tramite certificato. 
+
+La Figura 2 mostra il certificato digitale installato sul browser Firefox. Questo è il certificato da
+utilizzare per l'autenticazione.
+
+![Certificato Digitale Personale installato sul browser](images/InstalledDigitalPersonalCertified.png)
+
+**Figura 2 - Installazione del certificato digitale personale sul browser Firefox**
+
+Puntando all'indirizzo [https://tls-auth.dontesta.it:10443](https://tls-auth.dontesta.it:10443) dovrebbe accadere quanto segue:
+
+1. Cliccare sul pulsante _Login_ o _LOGIN WITH YOUR DIGITAL CERTIFICATE_
+2. Selezionare il certificato digitale installato in precedenza
 3. Visualizzazione della pagina di benvenuto.
 
-Oltre a verificare che il certificato digitale sulla CNS e CIE sia valido, è anche
-eseguito il controllo per cui tra le **Certificate Policies (Object ID: 2.5.29.32)** 
-ci sia quella specifica della CNS e CIE. Certification Policies:
+Le immagini a seguire mostrano il risultato dei tre step precedentemente indicati.
 
-1. CNS identificata dall'OID [1.3.76.16.2.1](http://oid-info.com/cgi-bin/display?oid=1.3.76.16.2.1&action=display);
-2. CIE identificata dall'OID [1.3.76.47.4](http://oid-info.com/cgi-bin/display?oid=1.3.76.47&action=display)
+![Welcome Page di Accesso](images/WelcomePageToAccessViaClientCertificate.png)
 
-Questo check è demandato allo script PHP `configs/www/secure/certificate_policy_check.php` 
-mostrato di seguito.
+**Figura 3 - Welcome Page di accesso tramite certificato client**
 
-```php
-<?php
-$cnsCertificatePolicies = 'Policy: 1.3.76.16.2.1';
-$cieCertificatePolicies = 'Policy: 1.3.76.47.4';
+![Selezione certificato](images/SelectClientCertificate.png)
 
-$ssl = openssl_x509_parse(getenv('SSL_CLIENT_CERT'));
+**Figura 4 - Selezione del certificato client**
 
-if((preg_match("/$cnsCertificatePolicies$/m", $ssl['extensions']['certificatePolicies']) == 0) && 
-    (preg_match("/$cieCertificatePolicies$/m", $ssl['extensions']['certificatePolicies']) == 0)) {
-    
-    die("Il certificato è valido ma non dispone della Certification Policy 
-        che dovrebbe avere una CNS - Carta Nazionale Servizi o la CIE - Carta d'Identità Elettronica. 
-        <br>La Certification Policy per la CNS è definita dall'OID 1.3.76.16.2.1 mentre per la CIE
-        è definita dall'OID 1.3.76.47.4.
+![Welcome Page dopo accesso](images/WelcomePageAfterSuccessAuth.png)
 
-        <ul>
-            <li>OID 1.3.76.16.2.1 => <a href='http://oid-info.com/cgi-bin/display?oid=1.3.76.16.2.1&action=display'
-                >{iso(1) identified-organization(3) uninfo(76) agid(16) authentication(2) cns(1)}
-                </a>
-            </li>
-            <li>OID 1.3.76.47.4 => <a href='http://oid-info.com/get/1.3.76.47'
-                >{iso(1) identified-organization(3) uninfo(76) 47}
-                </a>
-            </li>
-        </ul>");
-}
-?>
-```
+**Figura 5 - Welcome Page dopo accesso avvenuto con successo**
 
-Purtroppo la funzione [PeerExtList(object-ID)](https://httpd.apache.org/docs/2.4/mod/mod_ssl.html) 
-del modulo *mod_ssl* non permette il check dell'estensione *CertificatePolicies*
-perché strutturata.
-
-A seguire una serie di screenshot che mostrano l'esecuzione del test di autenticazione, 
-utilizzando la TS-CNS. L'esecuzione del test di autenticazione con la CIE è esattamente 
-identico a quello della TS-CNS.
-
-
-![Inserimento PIN TS-CNS](images/TS-CNS_InserimentoPINCODE.png)
-
-**Figura 1 - Inserimento del PIN della TS-CNS**
-
-
-![Selezione del certificato digitale](images/TS-CNS_SelezioneCertificato.png)
-
-**Figura 2 - Selezione del certificato digitale**
-
-
-![WelcomePage](images/TS-CNS_WelcomePage_1.png)
-
-**Figura 3 - Pagina di benvenuto dopo l'autenticazione**
-
-![WelcomePage](images/TS-CNS_WelcomePage_2.png)
-
-**Figura 4 - Pagina di benvenuto dopo l'autenticazione**
-
-
-![ErrorPage](images/TS-CNS_CertificationPolicyFailed.png)
-
-**Figura 5 - Notifica di errore per check Policy fallito**
-
-![ErrorPage](images/TS-CNS_SSL_VERIFIY_Failed.png)
-
-**Figura 6 - Pagina di errore in caso di errore validazione certificato**
 
 Accedendo agli access log di Apache è possibile notare queste due informazioni 
 utili al tracciamento delle operazioni eseguite dall'utente:
 
 * Il protocollo SSL
-* Il SSL_CLIENT_S_DN_CN 
+* Il valore della variabile SSL_CLIENT_S_DN_CN 
 
 ```log
-172.17.0.1 TLSv1.2 - MSRNTN77H15C351X/6120016461039008.i1ZpZfaCX/eKyikBfnF8to+M2T8= [18/Dec/2018:17:48:53 +0000] "GET / HTTP/1.1" 200 2787 "-" "Mozilla/5.0 (Macintosh; Intel Mac OSX 10.14; rv:64.0) Gecko/20100101 Firefox/64.0"
+172.17.0.1 TLSv1.2 - antonio.musarra@gmail.com [11/Apr/2019:20:17:53 +0000] "GET /secure/ HTTP/1.1" 200 4745 "https://tls-auth.dontesta.it:10443/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:66.0) Gecko/20100101 Firefox/66.0"
 ```
 
 Il valore di `SSL_CLIENT_S_DN_CN` è inoltre impostato come **SSLUserName**, questo
 fa in modo che la variabile `REMOTE_USER` sia impostata con il CN del certificato digitale 
 che identifica univocamente l'utente. 
 
-## 6 - Build, Run e Push docker image via Makefile
+In caso di errore in fase di validazione del certificato client, viene mostrata la pagina
+di errore visibile in Figura 6.
+
+![Pagina di errore in caso di certificato non valito](images/CertificateValidationError.png)
+
+**Figura 6 - Pagina di errore in caso di certificato non valito**
+
+
+## 5 - Build, Run e Push docker image via Makefile
 Al fine di semplificare le operazioni di build, run e push dell'immagine docker, 
-è stato introdotto il [Makefile](https://github.com/italia/apache-httpd-ts-cns-docker/blob/develop/Makefile) sulla versione [1.2.3](https://github.com/italia/apache-httpd-ts-cns-docker/tree/v1.2.3) del progetto.
+è stato introdotto il [Makefile](https://github.com/amusarra/docker-apache-ssl-tls-mutual-authentication/blob/develop/Makefile).
 
 Per utilizzare il Makefile, occorre che sulla propria macchina siano installati
 correttamente i tools di build.
@@ -590,21 +405,66 @@ I target disponibili sono i seguenti:
 dell'immagine su DockerHub richiede l'accesso (via username e password) tramite 
 il comando `docker login`.
 
-## 7 - Conclusioni
-Lo stimolo iniziale che ha poi scatenato la nascita di questo progetto, arriva
-dalle difficoltà incontrate cercando di accedere ai servizi del 
-[Sistema Informativo Veterinario](https://www.vetinfo.it/) utilizzando la mia TS-CNS su Mac OS.
+## 6 - Come sono stati generati i certificati
+Tutti i certificati di esempio disponibili all'interno del progetto sono stati generati
+utilizzando il tool [OpenSSL](https://openssl.org).
 
+Creazione della propria Certificate Authority
+```
+$ openssl req -config ./configs/openssl/openssl.cnf -newkey rsa:2048 -nodes \
+-keyform PEM -keyout ./configs/certs/blog.dontesta.it.ca.key -x509 -days 3650 -extensions certauth -outform PEM -out ./configs/certs/blog.dontesta.it.ca.cer
+```
+
+Creazione della chiave privata del certificato server e CSR
+```
+$ openssl genrsa -out ./configs/certs/tls-auth.dontesta.it.key 2048
+$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-auth.dontesta.it.key -out ./configs/certs/tls-auth.dontesta.it.req
+```
+
+Firma del certificato server da parte della CA
+```
+$ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
+-set_serial 100 -extfile ./configs/openssl/openssl.cnf -extensions server -days 365 -outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
+```
+
+A seguire i comandi OpenSSL utilizzati per creare i certificati client.
+
+Creazione delle chiavi private
+```
+$ openssl genrsa -out ./configs/certs/tls-client.dontesta.it.key 2048
+$ openssl genrsa -out ./configs/certs/mrossi.dontesta.it.key 2048
+```
+
+Creazione delle CSR
+```
+$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-client.dontesta.it.key -out ./configs/certs/tls-client.dontesta.it.req
+
+$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/mrossi.dontesta.it.key -out ./configs/certs/mrossi.dontesta.it.req
+```
+
+Firma dei certificati client da parte della CA
+```
+$ openssl x509 -req -in ./configs/certs/tls-client.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
+-set_serial 200 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/tls-client.dontesta.it.cer
+
+$ openssl x509 -req -in ./configs/certs/mrossi.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
+-set_serial 400 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/mrossi.dontesta.it.cer
+```
+
+Esportazione della coppia di chiavi in formato PKCS#12
+```
+$ openssl pkcs12 -export -inkey ./configs/certs/tls-client.dontesta.it.key -in ./configs/certs/tls-client.dontesta.it.cer -out ./configs/certs/tls-client.dontesta.it.p12
+
+$ openssl pkcs12 -export -inkey ./configs/certs/mrossi.dontesta.it.key -in ./configs/certs/mrossi.dontesta.it.cer -out ./configs/certs/mrossi.dontesta.it.p12
+```
+
+## 7 - Conclusioni
 Credo che questo progetto possa essere utile a coloro che hanno la necessità di
-realizzare un servizio di autenticazione basato sulla TS-CNS o CIE e non sanno magari
+realizzare un servizio di mutua autenticazione SSL/TLS e non sanno magari
 da dove iniziare. **Questo progetto potrebbe essere quindi un buon punto di partenza.**
 
 Ogni suggerimento e/o segnalazione di bug è gradito; consiglio eventualmente di 
-aprire una [issue](https://github.com/italia/apache-httpd-ts-cns-docker/issues)
-
-Ho descritto la mia esperienza con il Sistema Informativo Veterinario sull'articolo
-[Come accedere al portale VETINFO tramite TS-CNS e Mac OS](https://www.dontesta.it/2019/01/04/come-accedere-vetinfo-tramite-ts-cns-e-mac-os/)
-pubblicato recentemente su [Antonio Musarra's Blog](https://www.dontesta.it).
+aprire una [issue](https://github.com/amusarra/docker-apache-ssl-tls-mutual-authentication/issues)
 
 ## Project License
 The MIT License (MIT)
