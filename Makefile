@@ -33,7 +33,7 @@ GIT_COMMIT = $(strip $(shell git rev-parse --short HEAD))
 ifeq (0, $(shell git describe --tags --abbrev=0 ; echo $$?))
 	CODE_VERSION = $(strip $(shell git describe --tags --abbrev=0 | cut -c2-))
 else
-	CODE_VERSION = latest
+	CODE_VERSION = 1.0.0
 endif
 
 # Find out if the working directory is clean
