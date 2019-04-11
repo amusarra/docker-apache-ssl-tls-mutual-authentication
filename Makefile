@@ -30,12 +30,16 @@ EXPOSE_HTTPS_PORT ?= 10443
 GIT_COMMIT = $(strip $(shell git rev-parse --short HEAD))
 
 # Get the version number from the code
-CODE_VERSION = $(strip $(shell git describe --tags --abbrev=0 | cut -c2-))
+ifeq (0, $(shell git describe --tags --abbrev=0 ; echo $$?))
+	CODE_VERSION = $(strip $(shell git describe --tags --abbrev=0 | cut -c2-))
+else
+	CODE_VERSION = latest
+endif
 
 # Find out if the working directory is clean
 GIT_NOT_CLEAN_CHECK = $(shell git status --porcelain)
 ifneq (x$(GIT_NOT_CLEAN_CHECK), x)
-DOCKER_TAG_SUFFIX = "-dirty"
+DOCKER_TAG_SUFFIX = -dirty
 endif
 
 # If we're releasing to Docker Hub, and we're going to mark it with the latest
