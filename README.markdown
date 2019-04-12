@@ -1,9 +1,9 @@
 # Apache HTTP 2.4 - Docker image for SSL/TLS Mutual Authentication
 [![Antonio Musarra's Blog](https://img.shields.io/badge/maintainer-Antonio_Musarra's_Blog-purple.svg?colorB=6e60cc)](https://www.dontesta.it)
 [![Build Status](https://travis-ci.org/amusarra/docker-apache-ssl-tls-mutual-authentication.svg?branch=master)](https://travis-ci.org/amusarra/docker-apache-ssl-tls-mutual-authentication)
-[![](https://images.microbadger.com/badges/image/amusarra/apache-ssl-tls-mutual-authentication:1.0.0.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication:1.0.0 "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/amusarra/apache-ssl-tls-mutual-authentication:1.0.0.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication:1.0.0 "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/commit/amusarra/apache-ssl-tls-mutual-authentication:1.0.0.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication:1.0.0 "Get your own commit badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/amusarra/apache-ssl-tls-mutual-authentication.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/amusarra/apache-ssl-tls-mutual-authentication.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/commit/amusarra/apache-ssl-tls-mutual-authentication.svg)](https://microbadger.com/images/amusarra/apache-ssl-tls-mutual-authentication "Get your own commit badge on microbadger.com")
 [![Twitter Follow](https://img.shields.io/twitter/follow/antonio_musarra.svg?style=social&label=%40antonio_musarra%20on%20Twitter&style=plastic)](https://twitter.com/antonio_musarra)
 
 L'obiettivo di questo progetto è quello di fornire un **template** pronto all'uso
