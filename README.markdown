@@ -11,8 +11,15 @@ e che realizza un sistema di **mutua autenticazione o autenticazione bilaterale 
 basato su [Apache HTTP](http://httpd.apache.org/docs/2.4/). 
 **Ognuno è libero poi di modificare o specializzare questo progetto sulla base delle proprie esigenze**
 
+
+![](images/iconfinder_note.png)
+Il progetto è stato realizzato su macOS Mojave 10.14.4 e testato su Docker Desktop 
+CE (versione 2.0.0.3) e Docker (Engine) 18.09.2. 
+
 ## 1 - Overview
-Questo è un progetto [docker](https://www.docker.com/) che parte dall'immagine base di [*ubuntu:18.04*](https://hub.docker.com/_/ubuntu), specializzato per soddisfare i requisiti minimi per un sistema di mutua autenticazione SSL/TLS.
+Questo è un progetto [docker](https://www.docker.com/) che parte dall'immagine 
+base di [*ubuntu:18.04*](https://hub.docker.com/_/ubuntu), specializzato per 
+soddisfare i requisiti minimi per un sistema di mutua autenticazione SSL/TLS.
 
 Il software di base installato è:
 
@@ -22,16 +29,18 @@ Il software di base installato è:
 
 _L'installazione di PHP e del modulo per Apache è del tutto opzionale_. I due 
 moduli sono stati installati esclusivamente per costruire la pagina di atterraggio
-dell'utente dopo la fase di autenticazione. Questa pagina mostra una serie d'informazioni
-base estratte dal certificato digitale utilizzato per l'autenticazione.
+dell'utente dopo la fase di autenticazione. Questa pagina mostra una serie 
+d'informazioni base estratte dal certificato digitale utilizzato per 
+l'autenticazione.
 
-La mutua autenticazione basata sul protocollo SSL/TLS si riferisce a due parti che si autenticano
-reciprocamente attraverso la verifica del certificato digitale fornito in modo che entrambe i 
-partecipanti siano sicuri dell'identità altrui.
+La mutua autenticazione basata sul protocollo SSL/TLS si riferisce a due parti 
+che si autenticano reciprocamente attraverso la verifica del certificato 
+digitale fornito in modo che entrambe i partecipanti siano sicuri 
+dell'identità altrui.
 
-Da un punto di vista di alto livello, il processo di autenticazione e creazione di un canale 
-crittografato utilizzando l'autenticazione reciproca (o mutua autenticazione) basata su certificati 
-prevede i passaggi seguenti:
+Da un punto di vista di alto livello, il processo di autenticazione e creazione 
+di un canale crittografato utilizzando l'autenticazione reciproca (o mutua 
+autenticazione) basata su certificati prevede i passaggi seguenti:
 
 1. Un client richiede l'accesso a una risorsa protetta;
 2. Il server presenta il suo certificato al client;
@@ -40,8 +49,8 @@ prevede i passaggi seguenti:
 5. Il server verifica le credenziali del cliente;
 6. In caso di esito positivo, il server concede l'accesso alla risorsa protetta richiesta dal client.
 
-In Figura 1 è mostrato quello che accade durante il processo di autenticazione reciproca (o
-mutua autenticazione).
+In Figura 1 è mostrato quello che accade durante il processo di autenticazione 
+reciproca (o mutua autenticazione).
 
 ![Cosa succede durante il processo di autenticazione reciproca](images/security-sslBMAWithCertificates.gif)
 
@@ -49,7 +58,7 @@ mutua autenticazione).
 
 
 ## 2 - Struttura del Docker File
-Cerchiamo di capire quali sono le sezioni più significative del Dockefile. 
+Cerchiamo di capire quali sono le sezioni più significative del Dockerfile. 
 La prima riga del file (come anticipato in precedenza) fa in modo che il 
 container parta dall'immagine docker *ubuntu:18.04*.
 
@@ -77,15 +86,17 @@ ENV APPLICATION_URL https://${APACHE_SERVER_NAME}:${APACHE_SSL_PORT}
 ENV CLIENT_VERIFY_LANDING_PAGE /error.php
 ```
 
-Il primo gruppo delle quattro variabili sono molto esplicative e non necessitano approfondimenti.
-Le variabili a seguire e in particolare `APACHE_SSL_CERTS` e `APACHE_SSL_PRIVATE` impostano:
+Il primo gruppo di quattro variabili sono molto esplicative e non necessitano 
+approfondimenti. Le variabili a seguire e in particolare 
+`APACHE_SSL_CERTS` e `APACHE_SSL_PRIVATE` impostano:
 
 1. il nome del file che contiene il certificato pubblico del server in formato PEM;
 2. il nome del file che contiene la chiave privata (in formato PEM) del certificato pubblico.
 
 Il certificato server utilizzato in questo progetto è stato rilasciato da una
-_Certification Authority_ privata (non riconosciuta). Il CN (Common Name) di questo specifico certificato 
-è impostato a **tls-auth.dontesta.it**.
+_Certification Authority_ privata create ad hoc e ovviamente non riconosciuta. 
+Il CN (Common Name) di questo specifico certificato è impostato 
+a **tls-auth.dontesta.it** rilasciato dalla _Antonio Musarra's Blog Certification Authority_.
 
 Di default la porta *HTTPS* è impostata a **10443** dalla variabile `APACHE_SSL_PORT`.
 La variabile `APPLICATION_URL` definisce il path di redirect qualora si accedesse 
@@ -106,8 +117,8 @@ Nel caso in cui il valore della direttiva di Apache **SSLVerifyClient** sia
 allora sarebbe visualizzata la specifica pagina definita dalla variabile 
 `CLIENT_VERIFY_LANDING_PAGE`.
 
-La sezione a seguire del Dockerfile, contiene tutte le direttive necessarie per 
-l'installazione del software indicato in precedenza. Dato che la  distribuzione scelta 
+La sezione a seguire del Dockerfile contiene tutte le direttive necessarie per 
+l'installazione del software indicato in precedenza. Dato che la distribuzione scelta 
 è [**Ubuntu**](https://www.ubuntu.com/), il comando *apt* è responsabile della gestione 
 dei package, quindi dell'installazione.
 
@@ -219,36 +230,39 @@ seguire. Il cuore di tutto è la directory **configs**.
     └── entrypoint
 ```
 
-La directory *configs* contiene al suo interno altre folder e file, in particolare:
+La directory *configs* contiene al suo interno altre folder e file, 
+in particolare:
 
 1. **certs**
     * contiene il certificato del server (chiave pubblica, chiave privata e CSR);
     * contiene il certificato della CA (chiave pubblica e chiave privata);
     * contiene il certificato client personale per l'autenticazione tramite browser. Sono disponibili: chiave pubblica, chiave privata, CSR, coppia di chiavi in formato PKCS#12;
-    * contiene il certificato client da utilizzare per autenticare un applicazione o dispositivo. Sono disponibili: chiave pubblica, chiave privata, CSR, coppia di chiavi in formato PKCS#12;
-2. **openssl**: contiene il file di configurazione per il tool openssl;
+    * contiene il certificato client da utilizzare per autenticare un'applicazione o dispositivo. Sono disponibili: chiave pubblica, chiave privata, CSR, coppia di chiavi in formato PKCS#12;
+2. **openssl**: contiene il file di configurazione per il tool openssl con le impostazioni predefinite;
 3. **httpd**: contiene tutte le configurazioni di Apache necessarie per abilitare la mutua autenticazione;
 4. **www**: contiene una semplice interfaccia web;
 5. **scripts**: contiene l'entrypoint script che avvia il server Apache
 
 ## 4 - Quickstart
-L'immagine di questo progetto docker è disponibile sull'account docker hub
+L'immagine di questo progetto docker è disponibile sul mio account docker hub
 [amusarra/apache-ssl-tls-mutual-authentication](https://hub.docker.com/r/amusarra/apache-ssl-tls-mutual-authentication).
 
-A seguire il comando per il pull dell'immagine docker ospitata su docker hub. Il primo comando 
-esegue il pull dell'ultima versione (tag latest), mentre il secondo comando esegue 
-il pull della specifica versione dell'immagine, in questo caso la versione 1.0.0.
+A seguire il comando per il **pull** dell'immagine docker ospitata su docker hub. 
+Il primo comando esegue il pull dell'ultima versione (tag latest), mentre il 
+secondo comando esegue il pull della specifica versione dell'immagine che in 
+questo caso è la versione 1.0.0.
 
 ```bash
 docker pull amusarra/apache-ssl-tls-mutual-authentication
 docker pull amusarra/apache-ssl-tls-mutual-authentication:1.0.0
 ```
-Una volta eseguito il pull dell'immagine docker (versione 1.0.0) è possibile creare il nuovo
-container tramite il comando a seguire.
+Una volta eseguito il pull dell'immagine docker (versione 1.0.0) è possibile 
+creare il nuovo container tramite il comando a seguire.
 
 ```bash
 docker run -i -t -d -p 10443:10443 --name=apache-ssl-tls-mutual-authentication amusarra/apache-ssl-tls-mutual-authentication:1.0.0
 ```
+
 Utilizzando il comando `docker ps` dovremmo poter vedere in lista il nuovo
 container, così come indicato a seguire.
 
@@ -257,9 +271,10 @@ CONTAINER ID        IMAGE                                  COMMAND              
 bb707fb00e89        amusarra/apache-ssl-tls-mutual-authentication:1.0.0   "/usr/sbin/apache2ct…"   6 seconds ago       Up 4 seconds        0.0.0.0:10443->10443/tcp   apache-ssl-tls-mutual-authentication
 ```
 
-Nel caso in cui vogliate apportare delle modifiche dovreste poi procedere con 
-la build della nuova immagine e al termine lanciare l'immagine ottenuta. 
-A seguire sono indicati i comandi *docker* da eseguire dal proprio terminale.
+Nel caso in cui vogliate apportare delle modifiche al Dockerfile, dovreste poi 
+procedere con la build della nuova immagine e al termine eseguire il run 
+dell'immagine ottenuta. A seguire sono indicati i comandi *docker* da eseguire 
+dal proprio terminale.
 
 _I comandi docker di build e run devono essere eseguiti dalla root della directory 
 di progetto dopo aver fatto il clone di questo repository._
@@ -272,7 +287,7 @@ docker run -i -t -d -p 10443:10443 --name=apache-ssl-tls-mutual-authentication a
 A questo punto sul nostro sistema dovremmo avere la nuova immagine con il 
 nome **apache-ssl-tls-mutual-authentication** e in esecuzione il nuovo container chiamato
 **apache-ssl-tls-mutual-authentication**. Per ragioni di comodità ho chiamato il container
-con lo stesso nome dell'immagine, nessun però vieta di assegnare un nome diverso. 
+con lo stesso nome dell'immagine, nessuno però vieta di assegnare un nome diverso. 
 
 Utilizzando il comando `docker images` dovremmo poter vedere in lista la nuova
 immagine, così come indicato a seguire.
@@ -290,8 +305,8 @@ CONTAINER ID        IMAGE                          COMMAND                  CREA
 65c874216624        apache-ssl-tls-mutual-authentication:latest   "/usr/sbin/apache2ct…"   36 minutes ago      Up 36 minutes       0.0.0.0:10443->10443/tcp   apache-ssl-tls-mutual-authentication
 ```
 
-Da questo momento è possibile raggiungere il servizio di mutua autenticazione SSL/TLS 
-utilizzando il browser. 
+Da questo momento è possibile raggiungere il servizio di mutua autenticazione 
+SSL/TLS utilizzando il browser. 
 
 Per evitare l'errore `SSL_ERROR_BAD_CERT_DOMAIN` da parte del browser accedendo 
 al servizio tramite la URL https://127.0.0.1:10443/, bisogna aggiungere al proprio
@@ -320,23 +335,29 @@ essere utilizzato per autenticare un'applicazione. Entrambe i certificati (quind
 di chiavi) sono contenuti all'interno di un PKCS#12. A seguire sono mostrati i subject dei
 rispettivi certificati.
 
+La password di entrambe i PKCS#12 è impostata a: **secret**. Questa è la password
+da utilizzare per importare i certificati.
+
 ```
 Subject: C=IT, L=Rome, ST=Italy, O=Mario Rossi S.r.l, OU=Horse Club, CN=mario.rossi@horseclubsample.com/emailAddress=admin@horseclubsample.com
 
 Subject: C=IT, L=Bronte, ST=Italy, O=Judio Horse Club, OU=IT Services, CN=tls-client.dontesta.it/emailAddress=info@dontesta.it
 ```
-I due certificati sono stati rilasciati dalla Certification Authority **Antonio Musarra's Blog**. A seguire
-i dettagli.
+
+I due certificati sono stati rilasciati dalla CA **Antonio Musarra's Blog Certification Authority**. 
+A seguire i dettagli della CA che ha rilasciato tutti i certificati disponibili
+all'interno del progetto.
 
 ```
 Issuer: C=IT, L=Rome, ST=Italy, O=Antonio Musarra's Blog, OU=IT Security Department, CN=Antonio Musarra's Blog Certification Authority/emailAddress=info@dontesta.it
 ```
+
 Una volta installato il certificato client (file con estensione .p12) sul proprio 
-browser (per esempio Firefox), è possibile eseguire il test di autenticazione 
+browser (per esempio Firefox), è possibile eseguire il test di mutua autenticazione 
 tramite certificato. 
 
-La Figura 2 mostra il certificato digitale installato sul browser Firefox. Questo è il certificato da
-utilizzare per l'autenticazione.
+La Figura 2 mostra il certificato digitale installato sul browser Firefox. 
+Questo è il certificato da utilizzare per l'autenticazione.
 
 ![Certificato Digitale Personale installato sul browser](images/InstalledDigitalPersonalCertified.png)
 
@@ -363,8 +384,8 @@ Le immagini a seguire mostrano il risultato dei tre step precedentemente indicat
 **Figura 5 - Welcome Page dopo accesso avvenuto con successo**
 
 
-Accedendo agli access log di Apache è possibile notare queste due informazioni 
-utili al tracciamento delle operazioni eseguite dall'utente:
+Accedendo agli _access log_ di Apache è possibile notare due informazioni utili 
+al tracciamento delle operazioni eseguite dall'utente:
 
 * Il protocollo SSL
 * Il valore della variabile SSL_CLIENT_S_DN_CN 
@@ -380,16 +401,16 @@ che identifica univocamente l'utente.
 In caso di errore in fase di validazione del certificato client, viene mostrata la pagina
 di errore visibile in Figura 6.
 
-![Pagina di errore in caso di certificato non valito](images/CertificateValidationError.png)
+![Pagina di errore in caso di certificato non valido](images/CertificateValidationError.png)
 
-**Figura 6 - Pagina di errore in caso di certificato non valito**
+**Figura 6 - Pagina di errore in caso di certificato non valido**
 
 
 ## 5 - Build, Run e Push docker image via Makefile
-Al fine di semplificare le operazioni di build, run e push dell'immagine docker, 
+Al fine di semplificare le operazioni di _build_, _run_ e _push_ dell'immagine docker, 
 è stato introdotto il [Makefile](https://github.com/amusarra/docker-apache-ssl-tls-mutual-authentication/blob/develop/Makefile).
 
-Per utilizzare il Makefile, occorre che sulla propria macchina siano installati
+Per utilizzare il Makefile occorre che sulla propria macchina siano installati
 correttamente i tools di build.
 
 I target disponibili sono i seguenti:
@@ -407,21 +428,31 @@ il comando `docker login`.
 
 ## 6 - Come sono stati generati i certificati
 Tutti i certificati di esempio disponibili all'interno del progetto sono stati generati
-utilizzando il tool [OpenSSL](https://openssl.org).
+utilizzando il tool [OpenSSL](https://openssl.org). Tutti i comandi a seguire sono
+stati e devono eventualmente essere eseguiti dalla root del progetto. I comandi
+hanno l'obiettivo di:
 
-Creazione della propria Certificate Authority
+1. Creare la propria Certificate Authority;
+2. Creare la chiave privata del certificato server e **CSR (Certificate Signing Request)**;
+3. Firmare il certificato server da parte della CA (creata in precedenza);
+4. Creare le chiavi private per i certificati client;
+5. Creare le CSR per i certificati client;
+6. Firmare i certificati client da parte della CA;
+7. Esportare la coppia di chiavi in formato PKCS#12.
+
+1 - Creazione della propria Certificate Authority
 ```
 $ openssl req -config ./configs/openssl/openssl.cnf -newkey rsa:2048 -nodes \
 -keyform PEM -keyout ./configs/certs/blog.dontesta.it.ca.key -x509 -days 3650 -extensions certauth -outform PEM -out ./configs/certs/blog.dontesta.it.ca.cer
 ```
 
-Creazione della chiave privata del certificato server e CSR
+2 - Creazione della chiave privata del certificato server e CSR
 ```
 $ openssl genrsa -out ./configs/certs/tls-auth.dontesta.it.key 2048
 $ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-auth.dontesta.it.key -out ./configs/certs/tls-auth.dontesta.it.req
 ```
 
-Firma del certificato server da parte della CA
+2 - Firma del certificato server da parte della CA
 ```
 $ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
 -set_serial 100 -extfile ./configs/openssl/openssl.cnf -extensions server -days 365 -outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
@@ -429,20 +460,20 @@ $ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -CA ./configs/c
 
 A seguire i comandi OpenSSL utilizzati per creare i certificati client.
 
-Creazione delle chiavi private
+3 - Creazione delle chiavi private
 ```
 $ openssl genrsa -out ./configs/certs/tls-client.dontesta.it.key 2048
 $ openssl genrsa -out ./configs/certs/mrossi.dontesta.it.key 2048
 ```
 
-Creazione delle CSR
+4 - Creazione delle CSR
 ```
 $ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-client.dontesta.it.key -out ./configs/certs/tls-client.dontesta.it.req
 
 $ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/mrossi.dontesta.it.key -out ./configs/certs/mrossi.dontesta.it.req
 ```
 
-Firma dei certificati client da parte della CA
+5 - Firma dei certificati client da parte della CA
 ```
 $ openssl x509 -req -in ./configs/certs/tls-client.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
 -set_serial 200 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/tls-client.dontesta.it.cer
@@ -451,7 +482,7 @@ $ openssl x509 -req -in ./configs/certs/mrossi.dontesta.it.req -CA ./configs/cer
 -set_serial 400 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/mrossi.dontesta.it.cer
 ```
 
-Esportazione della coppia di chiavi in formato PKCS#12
+6 - Esportazione della coppia di chiavi in formato PKCS#12
 ```
 $ openssl pkcs12 -export -inkey ./configs/certs/tls-client.dontesta.it.key -in ./configs/certs/tls-client.dontesta.it.cer -out ./configs/certs/tls-client.dontesta.it.p12
 
@@ -469,7 +500,7 @@ aprire una [issue](https://github.com/amusarra/docker-apache-ssl-tls-mutual-auth
 ## Project License
 The MIT License (MIT)
 
-Copyright &copy; 2018 Antonio Musarra's Blog - [https://www.dontesta.it](https://www.dontesta.it "Antonio Musarra's Blog"), 
+Copyright &copy; 2019 Antonio Musarra's Blog - [https://www.dontesta.it](https://www.dontesta.it "Antonio Musarra's Blog"), 
 [antonio.musarra@gmail.com](mailto:antonio.musarra@gmail.com "Antonio Musarra Email")
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
