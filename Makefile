@@ -30,10 +30,11 @@ EXPOSE_HTTPS_PORT ?= 10443
 GIT_COMMIT = $(strip $(shell git rev-parse --short HEAD))
 
 # Get the version number from the code
-ifeq (0, $(shell git describe --tags --abbrev=0 ; echo $$?))
-	CODE_VERSION = $(strip $(shell git describe --tags --abbrev=0 | cut -c2-))
+ANY_TAGS = $(shell git describe --tags --abbrev=0 > /dev/null 2>&1 ; echo $$?)
+ifeq ($(ANY_TAGS), 0)
+	CODE_VERSION = $(strip $(shell git describe --tags --abbrev=0))
 else
-	CODE_VERSION = 1.0.0
+	CODE_VERSION = latest
 endif
 
 # Find out if the working directory is clean
