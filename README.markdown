@@ -14,7 +14,8 @@ basato su [Apache HTTP](http://httpd.apache.org/docs/2.4/).
 
 ![](images/iconfinder_note.png)
 Il progetto è stato realizzato su macOS Mojave 10.14.4 e testato su Docker Desktop 
-CE (versione 2.0.0.3) e Docker (Engine) 18.09.2. 
+CE (versione 2.0.0.3) e Docker (Engine) 18.09.2. Per l'installazione su ambienti
+Microsoft Windows consiglio la lettura di [Install Docker Desktop for Windows](https://docs.docker.com/docker-for-windows/install/).
 
 ## 1 - Overview
 Questo è un progetto [docker](https://www.docker.com/) che parte dall'immagine 
@@ -25,7 +26,7 @@ Il software di base installato è:
 
 * Apache HTTP 2.4 (2.4.29)
 * PHP 7 (7.2.10-0ubuntu0.18.04.1)
-* Modulo PHP per Apache
+* PHP 7 FPM (FastCGI Process Manager)
 
 _L'installazione di PHP e del modulo per Apache è del tutto opzionale_. I due 
 moduli sono stati installati esclusivamente per costruire la pagina di atterraggio
@@ -82,6 +83,7 @@ ENV APACHE_SSL_PORT 10443
 ENV APACHE_LOG_LEVEL info
 ENV APACHE_SSL_LOG_LEVEL info
 ENV APACHE_SSL_VERIFY_CLIENT optional
+ENV APACHE_HTTP_PROTOCOLS http/1.1
 ENV APPLICATION_URL https://${APACHE_SERVER_NAME}:${APACHE_SSL_PORT}
 ENV CLIENT_VERIFY_LANDING_PAGE /error.php
 ```
@@ -117,6 +119,20 @@ Nel caso in cui il valore della direttiva di Apache **SSLVerifyClient** sia
 allora sarebbe visualizzata la specifica pagina definita dalla variabile 
 `CLIENT_VERIFY_LANDING_PAGE`.
 
+La variabile `APACHE_HTTP_PROTOCOLS` specifica l'elenco di protocolli supportati 
+per il server/host virtuale. L'elenco determina i protocolli consentiti che un 
+cliente può negoziare per questo server/host.
+
+È necessario impostare i protocolli se si desidera estendere i protocolli 
+disponibili per un server/host. Per impostazione predefinita, è consentito solo 
+il protocollo **http/1.1** (che include la compatibilità con i client 1.0 e 0.9).
+
+I protocolli validi sono http/1.1 per le connessioni **http** e **https**, 
+**h2** sulle connessioni https e **h2c** per le connessioni http.
+
+Per maggiorni informazioni consultare la documentazione 
+[Apache Module mod_http2](https://httpd.apache.org/docs/2.4/mod/mod_http2.html).
+
 La sezione a seguire del Dockerfile contiene tutte le direttive necessarie per 
 l'installazione del software indicato in precedenza. Dato che la distribuzione scelta 
 è [**Ubuntu**](https://www.ubuntu.com/), il comando *apt* è responsabile della gestione 
@@ -126,7 +142,7 @@ dei package, quindi dell'installazione.
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
-    && apt install -y php libapache2-mod-php \
+    && apt install -y php php7.2-fpm \
     && apt install -y curl \
     && apt install -y python \
     && rm -rf /var/lib/apt/lists/*
@@ -175,20 +191,29 @@ server Apache HTTP.
 COPY scripts/entrypoint /entrypoint
 ```
 
-La sezione a seguire del Dockerfile esegue le seguenti attività:
+La sezione a seguire del Dockerfile esegue le seguenti principali attività:
 
 1. abilita il modulo SSL
 2. abilita il modulo headers
-3. abilita il site ssl di default con la configurazione per la mutua autenticazione
-4. abilita delle opzioni di configurazione al fine di rafforzare la sicurezza SSL/TLS
-5. esegue il re-hash dei certificati. Operazione necessaria affinché Apache sia in grado di leggere i nuovi certificati
+3. abilita il modulo MPM Worker
+4. abilita il modulo HTTP2
+5. abilita il modulo Proxy FCGI (Fast CGI) 
+6. abilita il site ssl di default con la configurazione per la mutua autenticazione
+7. abilita delle opzioni di configurazione al fine di rafforzare la sicurezza SSL/TLS
+8. esegue il re-hash dei certificati. Operazione necessaria affinché Apache sia in grado di leggere i nuovi certificati
 
 ```docker
 RUN a2enmod ssl \
     && a2enmod headers \
     && a2enmod rewrite \
+    && a2dismod mpm_prefork \
+    && a2dismod mpm_event \
+    && a2enmod mpm_worker \
+    && a2enmod proxy_fcgi \
+    && a2enmod http2 \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
+    && a2enconf php7.2-fpm \
     && c_rehash /etc/ssl/certs/
 ```
 
@@ -442,54 +467,105 @@ hanno l'obiettivo di:
 
 1 - Creazione della propria Certificate Authority
 ```
-$ openssl req -config ./configs/openssl/openssl.cnf -newkey rsa:2048 -nodes \
--keyform PEM -keyout ./configs/certs/blog.dontesta.it.ca.key -x509 -days 3650 -extensions certauth -outform PEM -out ./configs/certs/blog.dontesta.it.ca.cer
+$ openssl req -config ./configs/openssl/openssl.cnf -newkey rsa -nodes \
+	-keyform PEM -keyout ./configs/certs/blog.dontesta.it.ca.key \
+	-x509 -days 3650 -extensions certauth \
+	-outform PEM -out ./configs/certs/blog.dontesta.it.ca.cer
 ```
 
 2 - Creazione della chiave privata del certificato server e CSR
 ```
-$ openssl genrsa -out ./configs/certs/tls-auth.dontesta.it.key 2048
-$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-auth.dontesta.it.key -out ./configs/certs/tls-auth.dontesta.it.req
+$ openssl genrsa -out ./configs/certs/tls-auth.dontesta.it.key 4096
+$ openssl req -config ./configs/openssl/openssl.cnf -new \
+	-key ./configs/certs/tls-auth.dontesta.it.key \
+	-out ./configs/certs/tls-auth.dontesta.it.req
 ```
 
 2 - Firma del certificato server da parte della CA
 ```
-$ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
--set_serial 100 -extfile ./configs/openssl/openssl.cnf -extensions server -days 365 -outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
+$ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -sha512 \
+	-CA ./configs/certs/blog.dontesta.it.ca.cer \
+	-CAkey ./configs/certs/blog.dontesta.it.ca.key \
+	-set_serial 100 -extfile ./configs/openssl/openssl.cnf \
+	-extensions server -days 735 \
+	-outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
 ```
 
 A seguire i comandi OpenSSL utilizzati per creare i certificati client.
 
 3 - Creazione delle chiavi private
 ```
-$ openssl genrsa -out ./configs/certs/tls-client.dontesta.it.key 2048
-$ openssl genrsa -out ./configs/certs/mrossi.dontesta.it.key 2048
+$ openssl genrsa -out ./configs/certs/tls-client.dontesta.it.key 4096
+$ openssl genrsa -out ./configs/certs/mrossi.dontesta.it.key 4096
 ```
 
 4 - Creazione delle CSR
 ```
-$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-client.dontesta.it.key -out ./configs/certs/tls-client.dontesta.it.req
+$ openssl req -config ./configs/openssl/openssl.cnf \
+	-new -key ./configs/certs/tls-client.dontesta.it.key \
+	-out ./configs/certs/tls-client.dontesta.it.req
 
-$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/mrossi.dontesta.it.key -out ./configs/certs/mrossi.dontesta.it.req
+$ openssl req -config ./configs/openssl/openssl.cnf \
+	-new -key ./configs/certs/mrossi.dontesta.it.key \
+	-out ./configs/certs/mrossi.dontesta.it.req
 ```
 
 5 - Firma dei certificati client da parte della CA
 ```
-$ openssl x509 -req -in ./configs/certs/tls-client.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
--set_serial 200 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/tls-client.dontesta.it.cer
+$ openssl x509 -req -in ./configs/certs/tls-client.dontesta.it.req -sha512 \
+	-CA ./configs/certs/blog.dontesta.it.ca.cer \
+	-CAkey ./configs/certs/blog.dontesta.it.ca.key \
+	-set_serial 200 -extfile ./configs/openssl/openssl.cnf \
+	-extensions client -days 365 \
+	-outform PEM -out ./configs/certs/tls-client.dontesta.it.cer
 
-$ openssl x509 -req -in ./configs/certs/mrossi.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
--set_serial 400 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/mrossi.dontesta.it.cer
+$ openssl x509 -req -in ./configs/certs/mrossi.dontesta.it.req -sha512 \
+	-CA ./configs/certs/blog.dontesta.it.ca.cer \
+	-CAkey ./configs/certs/blog.dontesta.it.ca.key \
+	-set_serial 400 -extfile ./configs/openssl/openssl.cnf \
+	-extensions client -days 365 -outform PEM \
+	-out ./configs/certs/mrossi.dontesta.it.cer
 ```
 
 6 - Esportazione della coppia di chiavi in formato PKCS#12
 ```
-$ openssl pkcs12 -export -inkey ./configs/certs/tls-client.dontesta.it.key -in ./configs/certs/tls-client.dontesta.it.cer -out ./configs/certs/tls-client.dontesta.it.p12
+$ openssl pkcs12 -export -inkey ./configs/certs/tls-client.dontesta.it.key \
+	-in ./configs/certs/tls-client.dontesta.it.cer \
+	-out ./configs/certs/tls-client.dontesta.it.p12
 
-$ openssl pkcs12 -export -inkey ./configs/certs/mrossi.dontesta.it.key -in ./configs/certs/mrossi.dontesta.it.cer -out ./configs/certs/mrossi.dontesta.it.p12
+$ openssl pkcs12 -export -inkey ./configs/certs/mrossi.dontesta.it.key \
+	-in ./configs/certs/mrossi.dontesta.it.cer \
+	-out ./configs/certs/mrossi.dontesta.it.p12
 ```
 
-## 7 - Conclusioni
+## 8 - Come abilitare il protocollo HTTP2
+Dalla versione 1.1.0 del progetto, è possibile attivare il protocollo [HTTP/2 (RFC 7540)](https://tools.ietf.org/html/rfc7540).
+
+Attivare il protocollo HTTP/2 (H2 SSL/TLS) è davvero semplice, basta eseguire il
+_run_ dell'immagine impostando le seguenti due varibili con i valori indicati
+di seguito.
+
+1. APACHE_SSL_VERIFY_CLIENT=require
+2. APACHE_HTTP_PROTOCOLS=h2 http/1.1
+
+Il comando mostrato esegue il run dell'immagine impostando le due variabili
+di ambiente che consentono l'attivazione del protocollo HTTP/2.
+
+```
+docker run -i -t -d -p 10443:10443 \
+	-e APACHE_SSL_VERIFY_CLIENT='require' \
+	-e APACHE_HTTP_PROTOCOLS='h2 http/1.1' \
+	--name=apache-ssl-tls-mutual-authentication \
+	amusarra/apache-ssl-tls-mutual-authentication:1.1.0
+```
+La figura a seguire illustra l'utilizzo del protocollo HTTP/2 (H2-TLS) invece del protocollo
+HTTP/1.1 (TLS).
+
+![Abilitazione protocollo HTTP/2 su Apache 2.4](images/Apache2.4_HTTP2_Enabled.png)
+
+**Figura 7 - Abilitazione protocollo HTTP/2 su Apache 2.4**
+
+## 9 - Conclusioni
 Credo che questo progetto possa essere utile a coloro che hanno la necessità di
 realizzare un servizio di mutua autenticazione SSL/TLS e non sanno magari
 da dove iniziare. **Questo progetto potrebbe essere quindi un buon punto di partenza.**
