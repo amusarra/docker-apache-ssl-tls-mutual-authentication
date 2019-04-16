@@ -442,51 +442,75 @@ hanno l'obiettivo di:
 
 1 - Creazione della propria Certificate Authority
 ```
-$ openssl req -config ./configs/openssl/openssl.cnf -newkey rsa:2048 -nodes \
--keyform PEM -keyout ./configs/certs/blog.dontesta.it.ca.key -x509 -days 3650 -extensions certauth -outform PEM -out ./configs/certs/blog.dontesta.it.ca.cer
+$ openssl req -config ./configs/openssl/openssl.cnf -newkey rsa -nodes \
+	-keyform PEM -keyout ./configs/certs/blog.dontesta.it.ca.key \
+	-x509 -days 3650 -extensions certauth \
+	-outform PEM -out ./configs/certs/blog.dontesta.it.ca.cer
 ```
 
 2 - Creazione della chiave privata del certificato server e CSR
 ```
-$ openssl genrsa -out ./configs/certs/tls-auth.dontesta.it.key 2048
-$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-auth.dontesta.it.key -out ./configs/certs/tls-auth.dontesta.it.req
+$ openssl genrsa -out ./configs/certs/tls-auth.dontesta.it.key 4096
+$ openssl req -config ./configs/openssl/openssl.cnf -new \
+	-key ./configs/certs/tls-auth.dontesta.it.key \
+	-out ./configs/certs/tls-auth.dontesta.it.req
 ```
 
 2 - Firma del certificato server da parte della CA
 ```
-$ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
--set_serial 100 -extfile ./configs/openssl/openssl.cnf -extensions server -days 365 -outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
+$ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -sha512 \
+	-CA ./configs/certs/blog.dontesta.it.ca.cer \
+	-CAkey ./configs/certs/blog.dontesta.it.ca.key \
+	-set_serial 100 -extfile ./configs/openssl/openssl.cnf \
+	-extensions server -days 735 \
+	-outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
 ```
 
 A seguire i comandi OpenSSL utilizzati per creare i certificati client.
 
 3 - Creazione delle chiavi private
 ```
-$ openssl genrsa -out ./configs/certs/tls-client.dontesta.it.key 2048
-$ openssl genrsa -out ./configs/certs/mrossi.dontesta.it.key 2048
+$ openssl genrsa -out ./configs/certs/tls-client.dontesta.it.key 4096
+$ openssl genrsa -out ./configs/certs/mrossi.dontesta.it.key 4096
 ```
 
 4 - Creazione delle CSR
 ```
-$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/tls-client.dontesta.it.key -out ./configs/certs/tls-client.dontesta.it.req
+$ openssl req -config ./configs/openssl/openssl.cnf \
+	-new -key ./configs/certs/tls-client.dontesta.it.key \
+	-out ./configs/certs/tls-client.dontesta.it.req
 
-$ openssl req -config ./configs/openssl/openssl.cnf -new -key ./configs/certs/mrossi.dontesta.it.key -out ./configs/certs/mrossi.dontesta.it.req
+$ openssl req -config ./configs/openssl/openssl.cnf \
+	-new -key ./configs/certs/mrossi.dontesta.it.key \
+	-out ./configs/certs/mrossi.dontesta.it.req
 ```
 
 5 - Firma dei certificati client da parte della CA
 ```
-$ openssl x509 -req -in ./configs/certs/tls-client.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
--set_serial 200 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/tls-client.dontesta.it.cer
+$ openssl x509 -req -in ./configs/certs/tls-client.dontesta.it.req -sha512 \
+	-CA ./configs/certs/blog.dontesta.it.ca.cer \
+	-CAkey ./configs/certs/blog.dontesta.it.ca.key \
+	-set_serial 200 -extfile ./configs/openssl/openssl.cnf \
+	-extensions client -days 365 \
+	-outform PEM -out ./configs/certs/tls-client.dontesta.it.cer
 
-$ openssl x509 -req -in ./configs/certs/mrossi.dontesta.it.req -CA ./configs/certs/blog.dontesta.it.ca.cer -CAkey ./configs/certs/blog.dontesta.it.ca.key \
--set_serial 400 -extfile ./configs/openssl/openssl.cnf -extensions client -days 365 -outform PEM -out ./configs/certs/mrossi.dontesta.it.cer
+$ openssl x509 -req -in ./configs/certs/mrossi.dontesta.it.req -sha512 \
+	-CA ./configs/certs/blog.dontesta.it.ca.cer \
+	-CAkey ./configs/certs/blog.dontesta.it.ca.key \
+	-set_serial 400 -extfile ./configs/openssl/openssl.cnf \
+	-extensions client -days 365 -outform PEM \
+	-out ./configs/certs/mrossi.dontesta.it.cer
 ```
 
 6 - Esportazione della coppia di chiavi in formato PKCS#12
 ```
-$ openssl pkcs12 -export -inkey ./configs/certs/tls-client.dontesta.it.key -in ./configs/certs/tls-client.dontesta.it.cer -out ./configs/certs/tls-client.dontesta.it.p12
+$ openssl pkcs12 -export -inkey ./configs/certs/tls-client.dontesta.it.key \
+	-in ./configs/certs/tls-client.dontesta.it.cer \
+	-out ./configs/certs/tls-client.dontesta.it.p12
 
-$ openssl pkcs12 -export -inkey ./configs/certs/mrossi.dontesta.it.key -in ./configs/certs/mrossi.dontesta.it.cer -out ./configs/certs/mrossi.dontesta.it.p12
+$ openssl pkcs12 -export -inkey ./configs/certs/mrossi.dontesta.it.key \
+	-in ./configs/certs/mrossi.dontesta.it.cer \
+	-out ./configs/certs/mrossi.dontesta.it.p12
 ```
 
 ## 7 - Conclusioni
