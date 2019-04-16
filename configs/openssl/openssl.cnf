@@ -1,5 +1,7 @@
 [ req ]
-default_md = sha1
+default_md = sha512
+default_bits = 4096
+default_days = 730
 distinguished_name = req_distinguished_name
 
 [ req_distinguished_name ]
