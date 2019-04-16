@@ -32,13 +32,17 @@ ENV APACHE_SSL_PORT 10443
 ENV APACHE_LOG_LEVEL info
 ENV APACHE_SSL_LOG_LEVEL info
 ENV APACHE_SSL_VERIFY_CLIENT optional
+
+# For more info See https://httpd.apache.org/docs/2.4/mod/mod_http2.html
+ENV APACHE_HTTP_PROTOCOLS http/1.1
+
 ENV APPLICATION_URL https://${APACHE_SERVER_NAME}:${APACHE_SSL_PORT}
 ENV CLIENT_VERIFY_LANDING_PAGE /error.php
 
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
-    && apt install -y php libapache2-mod-php \
+    && apt install -y php php7.2-fpm \
     && apt install -y curl \
     && apt install -y python \
     && rm -rf /var/lib/apt/lists/*
@@ -65,8 +69,9 @@ COPY images/favicon.ico /var/www/html/favicon.ico
 # Copy scripts and entrypoint
 COPY scripts/entrypoint /entrypoint
 
-# Set execute flag for entrypoint and crontab entry
+# Set execute flag for entrypoint
 RUN chmod +x /entrypoint \
+    && mkdir /run/php \
     && cd /var/www \
     && chown -R www-data:www-data /var/www/html
 
@@ -74,8 +79,14 @@ RUN chmod +x /entrypoint \
 RUN a2enmod ssl \
     && a2enmod headers \
     && a2enmod rewrite \
+    && a2dismod mpm_prefork \
+    && a2dismod mpm_event \
+    && a2enmod mpm_worker \
+    && a2enmod proxy_fcgi \
+    && a2enmod http2 \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
+    && a2enconf php7.2-fpm \
     && c_rehash /etc/ssl/certs/
 
 # Expose Apache
