@@ -44,7 +44,8 @@ RUN apt update \
     && apt install -y apache2 \
     && apt install -y php php7.2-fpm \
     && apt install -y curl \
-    && apt install -y python \
+    && apt install -y python3-pip \
+    && apt install -y git \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Apache configuration file
@@ -74,6 +75,8 @@ RUN chmod +x /entrypoint \
     && mkdir /run/php \
     && cd /var/www \
     && chown -R www-data:www-data /var/www/html
+
+RUN pip3 install --no-cache-dir pipenv
 
 # Configure and enabled Apache features
 RUN a2enmod ssl \
