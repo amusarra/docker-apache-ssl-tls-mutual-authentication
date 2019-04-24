@@ -4,7 +4,7 @@
 service php7.2-fpm restart
 
 # Start Gunicorn
-gunicorn httpbin:app -k gevent
+gunicorn httpbin:app -k gevent --access-logfile /var/log/gunicorn-access.log --error-logfile /var/log/gunicorn-error.log --daemon
 
 # Hand off to the CMD
 exec "$@"

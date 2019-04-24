@@ -85,6 +85,7 @@ tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 app = Flask(__name__, template_folder=tmpl_dir)
 app.debug = bool(os.environ.get("DEBUG"))
 app.config["JSONIFY_PRETTYPRINT_REGULAR"] = True
+app.config["APPLICATION_ROOT"] = os.environ.get("API_BASE_PATH")
 
 app.add_template_global("HTTPBIN_TRACKING" in os.environ, name="tracking_enabled")
 
@@ -107,7 +108,7 @@ template = {
         # "termsOfService": "http://me.com/terms",
         "version": version,
     },
-    "host": "httpbin.org",  # overrides localhost:5000
+    "host": os.environ.get("APACHE_SERVER_NAME") + ":" + os.environ.get("APACHE_SSL_PORT"),  # overrides localhost:5000
     "basePath": "/",  # base bash for blueprint registration
     "schemes": ["https"],
     "protocol": "https",
@@ -147,15 +148,15 @@ swagger_config = {
     "specs": [
         {
             "endpoint": "spec",
-            "route": "/spec.json",
+            "route": app.config["APPLICATION_ROOT"] + "/spec.json",
             "rule_filter": lambda rule: True,  # all in
             "model_filter": lambda tag: True,  # all in
         }
     ],
-    "static_url_path": "/flasgger_static",
+    "static_url_path": app.config["APPLICATION_ROOT"] + "/flasgger_static",
     # "static_folder": "static",  # must be set by user
     "swagger_ui": True,
-    "specs_route": "/",
+    "specs_route": app.config["APPLICATION_ROOT"],
 }
 
 swagger = Swagger(app, sanitizer=NO_SANITIZER, template=template, config=swagger_config)
@@ -237,13 +238,13 @@ def set_cors_headers(response):
 # ------
 
 
-@app.route("/legacy")
+@app.route(app.config["APPLICATION_ROOT"] + "/legacy")
 def view_landing_page():
     """Generates Landing Page in legacy layout."""
     return render_template("index.html")
 
 
-@app.route("/html")
+@app.route(app.config["APPLICATION_ROOT"] + "/html")
 def view_html_page():
     """Returns a simple HTML document.
     ---
@@ -259,7 +260,7 @@ def view_html_page():
     return render_template("moby.html")
 
 
-@app.route("/robots.txt")
+@app.route(app.config["APPLICATION_ROOT"] + "/robots.txt")
 def view_robots_page():
     """Returns some robots.txt rules.
     ---
@@ -278,7 +279,7 @@ def view_robots_page():
     return response
 
 
-@app.route("/deny")
+@app.route(app.config["APPLICATION_ROOT"] + "/deny")
 def view_deny_page():
     """Returns page denied by robots.txt rules.
     ---
@@ -297,7 +298,7 @@ def view_deny_page():
     # return "YOU SHOULDN'T BE HERE"
 
 
-@app.route("/ip")
+@app.route(app.config["APPLICATION_ROOT"] + "/ip")
 def view_origin():
     """Returns the requester's IP Address.
     ---
@@ -313,7 +314,7 @@ def view_origin():
     return jsonify(origin=request.headers.get("X-Forwarded-For", request.remote_addr))
 
 
-@app.route("/uuid")
+@app.route(app.config["APPLICATION_ROOT"] + "/uuid")
 def view_uuid():
     """Return a UUID4.
     ---
@@ -329,7 +330,7 @@ def view_uuid():
     return jsonify(uuid=str(uuid.uuid4()))
 
 
-@app.route("/headers")
+@app.route(app.config["APPLICATION_ROOT"] + "/headers")
 def view_headers():
     """Return the incoming request's HTTP headers.
     ---
@@ -345,7 +346,7 @@ def view_headers():
     return jsonify(get_dict('headers'))
 
 
-@app.route("/user-agent")
+@app.route(app.config["APPLICATION_ROOT"] + "/user-agent")
 def view_user_agent():
     """Return the incoming requests's User-Agent header.
     ---
@@ -363,7 +364,7 @@ def view_user_agent():
     return jsonify({"user-agent": headers["user-agent"]})
 
 
-@app.route("/get", methods=("GET",))
+@app.route(app.config["APPLICATION_ROOT"] + "/get", methods=("GET",))
 def view_get():
     """The request's query parameters.
     ---
@@ -379,8 +380,8 @@ def view_get():
     return jsonify(get_dict("url", "args", "headers", "origin"))
 
 
-@app.route("/anything", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"])
-@app.route(
+@app.route(app.config["APPLICATION_ROOT"] + "/anything", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"])
+@app.route(app.config["APPLICATION_ROOT"] + 
     "/anything/<path:anything>",
     methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"],
 )
@@ -411,7 +412,7 @@ def view_anything(anything=None):
     )
 
 
-@app.route("/post", methods=("POST",))
+@app.route(app.config["APPLICATION_ROOT"] + "/post", methods=("POST",))
 def view_post():
     """The request's POST parameters.
     ---
@@ -429,7 +430,7 @@ def view_post():
     )
 
 
-@app.route("/put", methods=("PUT",))
+@app.route(app.config["APPLICATION_ROOT"] + "/put", methods=("PUT",))
 def view_put():
     """The request's PUT parameters.
     ---
@@ -447,7 +448,7 @@ def view_put():
     )
 
 
-@app.route("/patch", methods=("PATCH",))
+@app.route(app.config["APPLICATION_ROOT"] + "/patch", methods=("PATCH",))
 def view_patch():
     """The request's PATCH parameters.
     ---
@@ -465,7 +466,7 @@ def view_patch():
     )
 
 
-@app.route("/delete", methods=("DELETE",))
+@app.route(app.config["APPLICATION_ROOT"] + "/delete", methods=("DELETE",))
 def view_delete():
     """The request's DELETE parameters.
     ---
@@ -483,7 +484,7 @@ def view_delete():
     )
 
 
-@app.route("/gzip")
+@app.route(app.config["APPLICATION_ROOT"] + "/gzip")
 @filters.gzip
 def view_gzip_encoded_content():
     """Returns GZip-encoded data.
@@ -500,7 +501,7 @@ def view_gzip_encoded_content():
     return jsonify(get_dict("origin", "headers", method=request.method, gzipped=True))
 
 
-@app.route("/deflate")
+@app.route(app.config["APPLICATION_ROOT"] + "/deflate")
 @filters.deflate
 def view_deflate_encoded_content():
     """Returns Deflate-encoded data.
@@ -517,7 +518,7 @@ def view_deflate_encoded_content():
     return jsonify(get_dict("origin", "headers", method=request.method, deflated=True))
 
 
-@app.route("/brotli")
+@app.route(app.config["APPLICATION_ROOT"] + "/brotli")
 @filters.brotli
 def view_brotli_encoded_content():
     """Returns Brotli-encoded data.
@@ -534,7 +535,7 @@ def view_brotli_encoded_content():
     return jsonify(get_dict("origin", "headers", method=request.method, brotli=True))
 
 
-@app.route("/redirect/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/redirect/<int:n>")
 def redirect_n_times(n):
     """302 Redirects n times.
     ---
@@ -569,7 +570,7 @@ def _redirect(kind, n, external):
     )
 
 
-@app.route("/redirect-to", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"])
+@app.route(app.config["APPLICATION_ROOT"] + "/redirect-to", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"])
 def redirect_to():
     """302/3XX Redirects to the given URL.
     ---
@@ -644,7 +645,7 @@ def redirect_to():
     return response
 
 
-@app.route("/relative-redirect/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/relative-redirect/<int:n>")
 def relative_redirect_n_times(n):
     """Relatively 302 Redirects n times.
     ---
@@ -674,7 +675,7 @@ def relative_redirect_n_times(n):
     return response
 
 
-@app.route("/absolute-redirect/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/absolute-redirect/<int:n>")
 def absolute_redirect_n_times(n):
     """Absolutely 302 Redirects n times.
     ---
@@ -699,7 +700,7 @@ def absolute_redirect_n_times(n):
     return _redirect("absolute", n, True)
 
 
-@app.route("/stream/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/stream/<int:n>")
 def stream_n_messages(n):
     """Stream n JSON responses
     ---
@@ -726,7 +727,7 @@ def stream_n_messages(n):
     return Response(generate_stream(), headers={"Content-Type": "application/json"})
 
 
-@app.route(
+@app.route(app.config["APPLICATION_ROOT"] + 
     "/status/<codes>", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"]
 )
 def view_status_code(codes):
@@ -777,7 +778,7 @@ def view_status_code(codes):
     return status_code(code)
 
 
-@app.route("/response-headers", methods=["GET", "POST"])
+@app.route(app.config["APPLICATION_ROOT"] + "/response-headers", methods=["GET", "POST"])
 def response_headers():
     """Returns a set of response headers from the query string.
     ---
@@ -821,7 +822,7 @@ def response_headers():
     return response
 
 
-@app.route("/cookies")
+@app.route(app.config["APPLICATION_ROOT"] + "/cookies")
 def view_cookies(hide_env=True):
     """Returns cookie data.
     ---
@@ -846,14 +847,14 @@ def view_cookies(hide_env=True):
     return jsonify(cookies=cookies)
 
 
-@app.route("/forms/post")
+@app.route(app.config["APPLICATION_ROOT"] + "/forms/post")
 def view_forms_post():
     """Simple HTML form."""
 
     return render_template("forms-post.html")
 
 
-@app.route("/cookies/set/<name>/<value>")
+@app.route(app.config["APPLICATION_ROOT"] + "/cookies/set/<name>/<value>")
 def set_cookie(name, value):
     """Sets a cookie and redirects to cookie list.
     ---
@@ -879,7 +880,7 @@ def set_cookie(name, value):
     return r
 
 
-@app.route("/cookies/set")
+@app.route(app.config["APPLICATION_ROOT"] + "/cookies/set")
 def set_cookies():
     """Sets cookie(s) as provided by the query string and redirects to cookie list.
     ---
@@ -910,7 +911,7 @@ def set_cookies():
     return r
 
 
-@app.route("/cookies/delete")
+@app.route(app.config["APPLICATION_ROOT"] + "/cookies/delete")
 def delete_cookies():
     """Deletes cookie(s) as provided by the query string and redirects to cookie list.
     ---
@@ -941,7 +942,7 @@ def delete_cookies():
     return r
 
 
-@app.route("/basic-auth/<user>/<passwd>")
+@app.route(app.config["APPLICATION_ROOT"] + "/basic-auth/<user>/<passwd>")
 def basic_auth(user="user", passwd="passwd"):
     """Prompts the user for authorization using HTTP Basic Auth.
     ---
@@ -969,7 +970,7 @@ def basic_auth(user="user", passwd="passwd"):
     return jsonify(authenticated=True, user=user)
 
 
-@app.route("/hidden-basic-auth/<user>/<passwd>")
+@app.route(app.config["APPLICATION_ROOT"] + "/hidden-basic-auth/<user>/<passwd>")
 def hidden_basic_auth(user="user", passwd="passwd"):
     """Prompts the user for authorization using HTTP Basic Auth.
     ---
@@ -996,7 +997,7 @@ def hidden_basic_auth(user="user", passwd="passwd"):
     return jsonify(authenticated=True, user=user)
 
 
-@app.route("/bearer")
+@app.route(app.config["APPLICATION_ROOT"] + "/bearer")
 def bearer_auth():
     """Prompts the user for authorization using bearer authentication.
     ---
@@ -1027,7 +1028,7 @@ def bearer_auth():
     return jsonify(authenticated=True, token=token)
 
 
-@app.route("/digest-auth/<qop>/<user>/<passwd>")
+@app.route(app.config["APPLICATION_ROOT"] + "/digest-auth/<qop>/<user>/<passwd>")
 def digest_auth_md5(qop=None, user="user", passwd="passwd"):
     """Prompts the user for authorization using Digest Auth.
     ---
@@ -1055,7 +1056,7 @@ def digest_auth_md5(qop=None, user="user", passwd="passwd"):
     return digest_auth(qop, user, passwd, "MD5", "never")
 
 
-@app.route("/digest-auth/<qop>/<user>/<passwd>/<algorithm>")
+@app.route(app.config["APPLICATION_ROOT"] + "/digest-auth/<qop>/<user>/<passwd>/<algorithm>")
 def digest_auth_nostale(qop=None, user="user", passwd="passwd", algorithm="MD5"):
     """Prompts the user for authorization using Digest Auth + Algorithm.
     ---
@@ -1088,7 +1089,7 @@ def digest_auth_nostale(qop=None, user="user", passwd="passwd", algorithm="MD5")
     return digest_auth(qop, user, passwd, algorithm, "never")
 
 
-@app.route("/digest-auth/<qop>/<user>/<passwd>/<algorithm>/<stale_after>")
+@app.route(app.config["APPLICATION_ROOT"] + "/digest-auth/<qop>/<user>/<passwd>/<algorithm>/<stale_after>")
 def digest_auth(
     qop=None, user="user", passwd="passwd", algorithm="MD5", stale_after="never"
 ):
@@ -1192,7 +1193,7 @@ def digest_auth(
     return response
 
 
-@app.route("/delay/<delay>", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"])
+@app.route(app.config["APPLICATION_ROOT"] + "/delay/<delay>", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "TRACE"])
 def delay_response(delay):
     """Returns a delayed response (max of 10 seconds).
     ---
@@ -1217,7 +1218,7 @@ def delay_response(delay):
     )
 
 
-@app.route("/drip")
+@app.route(app.config["APPLICATION_ROOT"] + "/drip")
 def drip():
     """Drips data over a duration after an optional initial delay.
     ---
@@ -1287,7 +1288,7 @@ def drip():
     return response
 
 
-@app.route("/base64/<value>")
+@app.route(app.config["APPLICATION_ROOT"] + "/base64/<value>")
 def decode_base64(value):
     """Decodes base64url-encoded string.
     ---
@@ -1311,7 +1312,7 @@ def decode_base64(value):
         return "Incorrect Base64 data try: SFRUUEJJTiBpcyBhd2Vzb21l"
 
 
-@app.route("/cache", methods=("GET",))
+@app.route(app.config["APPLICATION_ROOT"] + "/cache", methods=("GET",))
 def cache():
     """Returns a 304 if an If-Modified-Since header or If-None-Match is present. Returns the same as a GET otherwise.
     ---
@@ -1344,7 +1345,7 @@ def cache():
         return status_code(304)
 
 
-@app.route("/etag/<etag>", methods=("GET",))
+@app.route(app.config["APPLICATION_ROOT"] + "/etag/<etag>", methods=("GET",))
 def etag(etag):
     """Assumes the resource has the given etag and responds to If-None-Match and If-Match headers appropriately.
     ---
@@ -1382,7 +1383,7 @@ def etag(etag):
     return response
 
 
-@app.route("/cache/<int:value>")
+@app.route(app.config["APPLICATION_ROOT"] + "/cache/<int:value>")
 def cache_control(value):
     """Sets a Cache-Control header for n seconds.
     ---
@@ -1403,7 +1404,7 @@ def cache_control(value):
     return response
 
 
-@app.route("/encoding/utf8")
+@app.route(app.config["APPLICATION_ROOT"] + "/encoding/utf8")
 def encoding():
     """Returns a UTF-8 encoded body.
     ---
@@ -1419,7 +1420,7 @@ def encoding():
     return render_template("UTF-8-demo.txt")
 
 
-@app.route("/bytes/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/bytes/<int:n>")
 def random_bytes(n):
     """Returns n random bytes generated with given seed
     ---
@@ -1450,7 +1451,7 @@ def random_bytes(n):
     return response
 
 
-@app.route("/stream-bytes/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/stream-bytes/<int:n>")
 def stream_random_bytes(n):
     """Streams n random bytes generated with given seed, at given chunk size per packet.
     ---
@@ -1494,7 +1495,7 @@ def stream_random_bytes(n):
     return Response(generate_bytes(), headers=headers)
 
 
-@app.route("/range/<int:numbytes>")
+@app.route(app.config["APPLICATION_ROOT"] + "/range/<int:numbytes>")
 def range_request(numbytes):
     """Streams n random bytes generated with given seed, at given chunk size per packet.
     ---
@@ -1584,7 +1585,7 @@ def range_request(numbytes):
     return response
 
 
-@app.route("/links/<int:n>/<int:offset>")
+@app.route(app.config["APPLICATION_ROOT"] + "/links/<int:n>/<int:offset>")
 def link_page(n, offset):
     """Generate a page containing n links to other pages which do the same.
     ---
@@ -1618,13 +1619,13 @@ def link_page(n, offset):
     return "".join(html)
 
 
-@app.route("/links/<int:n>")
+@app.route(app.config["APPLICATION_ROOT"] + "/links/<int:n>")
 def links(n):
     """Redirect to first links page."""
     return redirect(url_for("link_page", n=n, offset=0))
 
 
-@app.route("/image")
+@app.route(app.config["APPLICATION_ROOT"] + "/image")
 def image():
     """Returns a simple image of the type suggest by the Accept header.
     ---
@@ -1659,7 +1660,7 @@ def image():
         return status_code(406)  # Unsupported media type
 
 
-@app.route("/image/png")
+@app.route(app.config["APPLICATION_ROOT"] + "/image/png")
 def image_png():
     """Returns a simple PNG image.
     ---
@@ -1675,7 +1676,7 @@ def image_png():
     return Response(data, headers={"Content-Type": "image/png"})
 
 
-@app.route("/image/jpeg")
+@app.route(app.config["APPLICATION_ROOT"] + "/image/jpeg")
 def image_jpeg():
     """Returns a simple JPEG image.
     ---
@@ -1691,7 +1692,7 @@ def image_jpeg():
     return Response(data, headers={"Content-Type": "image/jpeg"})
 
 
-@app.route("/image/webp")
+@app.route(app.config["APPLICATION_ROOT"] + "/image/webp")
 def image_webp():
     """Returns a simple WEBP image.
     ---
@@ -1707,7 +1708,7 @@ def image_webp():
     return Response(data, headers={"Content-Type": "image/webp"})
 
 
-@app.route("/image/svg")
+@app.route(app.config["APPLICATION_ROOT"] + "/image/svg")
 def image_svg():
     """Returns a simple SVG image.
     ---
@@ -1729,7 +1730,7 @@ def resource(filename):
       return f.read()
 
 
-@app.route("/xml")
+@app.route(app.config["APPLICATION_ROOT"] + "/xml")
 def xml():
     """Returns a simple XML document.
     ---
@@ -1746,7 +1747,7 @@ def xml():
     return response
 
 
-@app.route("/json")
+@app.route(app.config["APPLICATION_ROOT"] + "/json")
 def a_json_endpoint():
     """Returns a simple JSON document.
     ---
