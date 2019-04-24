@@ -3,5 +3,8 @@
 # Start PHP FPM
 service php7.2-fpm restart
 
+# Start Gunicorn
+gunicorn httpbin:app -k gevent
+
 # Hand off to the CMD
 exec "$@"
