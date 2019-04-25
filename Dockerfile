@@ -17,6 +17,9 @@ LABEL maintainer="Antonio Musarra <antonio.musarra@gmail.com>" \
     org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.schema-version="1.0"
 
+# Env for UTF-8 language encoding
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # Env for deb conf
 ENV DEBIAN_FRONTEND noninteractive
@@ -38,13 +41,16 @@ ENV APACHE_HTTP_PROTOCOLS http/1.1
 
 ENV APPLICATION_URL https://${APACHE_SERVER_NAME}:${APACHE_SSL_PORT}
 ENV CLIENT_VERIFY_LANDING_PAGE /error.php
+ENV API_BASE_PATH /secure/api
+ENV HTTPBIN_BASE_URL http://127.0.0.1:8000${API_BASE_PATH}
 
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
     && apt install -y php php7.2-fpm \
     && apt install -y curl \
-    && apt install -y python \
+    && apt install -y python3-pip \
+    && apt install -y git \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Apache configuration file
@@ -84,10 +90,25 @@ RUN a2enmod ssl \
     && a2enmod mpm_worker \
     && a2enmod proxy_fcgi \
     && a2enmod http2 \
+    && a2enmod proxy \
+    && a2enmod proxy_http \
+    && a2enmod remoteip \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
     && a2enconf php7.2-fpm \
     && c_rehash /etc/ssl/certs/
+
+## 
+# Install PIP Environment and setup for httpbin Project
+##
+RUN pip3 install --no-cache-dir pipenv 
+
+ADD .httpbin/Pipfile .httpbin/Pipfile.lock /httpbin/
+WORKDIR /httpbin
+
+RUN /bin/bash -c "pip3 install --no-cache-dir -r <(pipenv lock -r)"
+ADD .httpbin/. /httpbin
+RUN pip3 install --no-cache-dir /httpbin
 
 # Expose Apache
 EXPOSE ${APACHE_SSL_PORT}

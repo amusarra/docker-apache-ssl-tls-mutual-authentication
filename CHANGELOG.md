@@ -13,3 +13,7 @@ circa il progetto.
 - Regenerate all certificates with strong SHA2 alg
 - Enabled HTTP/2 protocol
 - Enabled PHP 7.2 FPM
+
+## [1.2.0] - 2019-04-25
+### Added
+- Include the [httpbin project](https://github.com/postmanlabs/httpbin.git). Project of [Kenneth Reitz](http://kennethreitz.org/bitcoin)
