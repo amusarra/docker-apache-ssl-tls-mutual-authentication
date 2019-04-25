@@ -86,6 +86,8 @@ ENV APACHE_SSL_VERIFY_CLIENT optional
 ENV APACHE_HTTP_PROTOCOLS http/1.1
 ENV APPLICATION_URL https://${APACHE_SERVER_NAME}:${APACHE_SSL_PORT}
 ENV CLIENT_VERIFY_LANDING_PAGE /error.php
+ENV API_BASE_PATH /secure/api
+ENV HTTPBIN_BASE_URL http://127.0.0.1:8000${API_BASE_PATH}
 ```
 
 Il primo gruppo di quattro variabili sono molto esplicative e non necessitano 
@@ -144,7 +146,8 @@ RUN apt update \
     && apt install -y apache2 \
     && apt install -y php php7.2-fpm \
     && apt install -y curl \
-    && apt install -y python \
+    && apt install -y python3-pip \
+    && apt install -y git \
     && rm -rf /var/lib/apt/lists/*
 ```
  
@@ -197,7 +200,7 @@ La sezione a seguire del Dockerfile esegue le seguenti principali attività:
 2. abilita il modulo headers
 3. abilita il modulo MPM Worker
 4. abilita il modulo HTTP2
-5. abilita il modulo Proxy FCGI (Fast CGI) 
+5. abilita i moduli Proxy, Proxy HTTP e Proxy FCGI (Fast CGI) 
 6. abilita il site ssl di default con la configurazione per la mutua autenticazione
 7. abilita delle opzioni di configurazione al fine di rafforzare la sicurezza SSL/TLS
 8. esegue il re-hash dei certificati. Operazione necessaria affinché Apache sia in grado di leggere i nuovi certificati
@@ -211,6 +214,9 @@ RUN a2enmod ssl \
     && a2enmod mpm_worker \
     && a2enmod proxy_fcgi \
     && a2enmod http2 \
+    && a2enmod proxy \
+    && a2enmod proxy_http \
+    && a2enmod remoteip \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
     && a2enconf php7.2-fpm \
@@ -241,7 +247,7 @@ seguire. Il cuore di tutto è la directory **configs**.
 |    |   ├── mrossi.dontesta.it.cer
 |    |   ├── mrossi.dontesta.it.key
 |    |   ├── mrossi.dontesta.it.p12
-|    |   ├── mrossi.dontesta.it.req
+|    |   └── mrossi.dontesta.it.req
 │    ├── httpd
 │    │   ├── 000-default.conf
 │    │   ├── default-ssl.conf
@@ -565,7 +571,37 @@ HTTP/1.1 (TLS).
 
 **Figura 7 - Abilitazione protocollo HTTP/2 su Apache 2.4**
 
-## 9 - Conclusioni
+## 9 - Integrazione del progetto httpbin
+Dalla versione 1.2.0 del progetto è stato introdotto [httpbin](https://github.com/postmanlabs/httpbin.git), progetto realizzato da [Kenneth Reitz](http://kennethreitz.org/bitcoin).
+
+[httpbin](https://github.com/postmanlabs/httpbin.git) è un progetto che implementa
+un semplice servizio di richiesta e risposta basato sul protocollo HTTP.
+
+Ho deciso d'integrare questo progetto per facilitare i test di accesso a servizi
+REST tramite mutua autenticazione.
+
+La variabile d'ambiente `API_BASE_PATH` definisce il base path dei servizi REST
+offerti dal progetto **httpbin** a cui è possibile accedere solo tramite una 
+mutua autenticazione.
+
+Puntando il proprio browser all'indirizzo [https://tls-auth.dontesta.it:10443/secure/api](https://tls-auth.dontesta.it:10443/secure/api) e dopo aver eseguito l'autenticazione, dovremmo ottenere l'interfaccia di [Swagger](https://swagger.io)
+che mostra la lista dei servizi disponibili e che possiamo richiamare direttamente dal browser.
+
+![Visualizzazione Swagger UI](images/httpbin_swagger_ui.png)
+
+**Figura 8 - Visualizzazione Swagger UI e servizi REST esposti da httpbin**
+
+Per ottenere il descrittore dei servizi REST in formato swagger 2.0, è sufficiente
+scaricare il documento json da [spec.json](https://tls-auth.dontesta.it:10443/secure/api/spec.json). Il descrittore può essere importato su Postman per poi testare i servizi REST in muta autenticazione. Prima di poter eseguire il test con Postman,
+occorre mettere a _off_ il controllo dei certificati SSL/TLS e importare il
+certificato client (vedi configs/certs).
+
+![Esempio di chiamata ad uno dei servizi di httpbin](images/postman_rest_call_1.png)
+
+**Figura 9 - Esempio di chiamata ad uno dei servizi di httpbin**
+
+
+## 10 - Conclusioni
 Credo che questo progetto possa essere utile a coloro che hanno la necessità di
 realizzare un servizio di mutua autenticazione SSL/TLS e non sanno magari
 da dove iniziare. **Questo progetto potrebbe essere quindi un buon punto di partenza.**
