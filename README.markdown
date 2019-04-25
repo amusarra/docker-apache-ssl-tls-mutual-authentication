@@ -577,28 +577,51 @@ Dalla versione 1.2.0 del progetto è stato introdotto [httpbin](https://github.c
 [httpbin](https://github.com/postmanlabs/httpbin.git) è un progetto che implementa
 un semplice servizio di richiesta e risposta basato sul protocollo HTTP.
 
-Ho deciso d'integrare questo progetto per facilitare i test di accesso a servizi
-REST tramite mutua autenticazione.
+Ho deciso d'integrare questo progetto al fine di facilitare i test di accesso tramite
+mutua autenticazione verso servizi REST.
 
-La variabile d'ambiente `API_BASE_PATH` definisce il base path dei servizi REST
-offerti dal progetto **httpbin** a cui è possibile accedere solo tramite una 
+La variabile d'ambiente `API_BASE_PATH` definisce il _base path_ dei servizi REST
+offerti dal progetto **httpbin** a cui è possibile accedere esclusivamente attraverso una
 mutua autenticazione.
 
 Puntando il proprio browser all'indirizzo [https://tls-auth.dontesta.it:10443/secure/api](https://tls-auth.dontesta.it:10443/secure/api) e dopo aver eseguito l'autenticazione, dovremmo ottenere l'interfaccia di [Swagger](https://swagger.io)
-che mostra la lista dei servizi disponibili e che possiamo richiamare direttamente dal browser.
+che mostra la lista dei servizi disponibili e che possiamo richiamare direttamente dal browser. La figura a seguire mostra l'interfaccia di Swagger.
 
 ![Visualizzazione Swagger UI](images/httpbin_swagger_ui.png)
 
 **Figura 8 - Visualizzazione Swagger UI e servizi REST esposti da httpbin**
 
 Per ottenere il descrittore dei servizi REST in formato swagger 2.0, è sufficiente
-scaricare il documento json da [spec.json](https://tls-auth.dontesta.it:10443/secure/api/spec.json). Il descrittore può essere importato su Postman per poi testare i servizi REST in muta autenticazione. Prima di poter eseguire il test con Postman,
-occorre mettere a _off_ il controllo dei certificati SSL/TLS e importare il
-certificato client (vedi configs/certs).
+scaricare il documento json [spec.json](https://tls-auth.dontesta.it:10443/secure/api/spec.json). Il descrittore può essere per esempio importato su [Postman](https://www.getpostman.com/) per poi testare i servizi REST in **muta autenticazione**. 
+
+![Esempio di chiamata a servizio REST via Swagger UI](images/httpbin_swagger_ui_call_api.png)
+
+**Figura 9 - Esempio di chiamata a servizio REST via Swagger UI**
+
+Prima di poter eseguire il test con Postman:
+
+1. Il certificato server è di tipo _self-signed_, occorre quindi impostare a __off__ il controllo dei certificati SSL/TLS (vedi figura 10). Questo evita di ottenere l'errore in fase di connessione al servizio;
+2. Importare il certificato client (vedi figura 11). È possibile utilizzare il certificato di esempio **tls-client.dontesta.it.cer** in dotazione con il progetto.
+
+![Disattivazione verifica SSL](images/postman_setting_ssl_1.png)
+
+**Figura 10 - Disattivazione verifica SSL**
+
+Postman richiede il file _cer_ e _key_ al fine di poter aggiungere il certificato
+client. La password da utilizzare è: **secret**
+
+![Aggiunta del certificato client per la muta autenticazione](images/postmain_add_client_cert.png)
+
+**Figura 11 - Aggiunta del certificato client per la muta autenticazione**
+
+La figura a seguire mostra un esempio di chiamata al servizio **/secure/api/get**.
+Da notare gli http header `X-Client-Dn` e `X-Client-Verify`, che rispettivamente
+mostrano il DN (Distinguished Name) del certificato client presentato in fase di
+autenticazione e l'esito del processo di autenticazione, in questo caso **SUCCESS**.
 
 ![Esempio di chiamata ad uno dei servizi di httpbin](images/postman_rest_call_1.png)
 
-**Figura 9 - Esempio di chiamata ad uno dei servizi di httpbin**
+**Figura 12 - Esempio di chiamata ad uno dei servizi di httpbin**
 
 
 ## 10 - Conclusioni
