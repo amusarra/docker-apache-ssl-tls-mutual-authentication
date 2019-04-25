@@ -17,3 +17,8 @@ circa il progetto.
 ## [1.2.0] - 2019-04-25
 ### Added
 - Include the [httpbin project](https://github.com/postmanlabs/httpbin.git). Project of [Kenneth Reitz](http://kennethreitz.org/bitcoin)
+
+## [1.2.1] - 2019-04-25
+### Changed
+- Upgrade Jinja2 and rope for security reason
+- Upgrade README
