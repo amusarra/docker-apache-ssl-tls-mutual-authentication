@@ -496,6 +496,8 @@ $ openssl x509 -req -in ./configs/certs/tls-auth.dontesta.it.req -sha512 \
 	-extensions server -days 735 \
 	-outform PEM -out ./configs/certs/tls-auth.dontesta.it.cer
 ```
+Dalla versione 1.2.2 del progetto, i certificati del server sono stati aggiornati
+con certificati rilasciati da Let's Encrypt (via (ZeroSSL)[https://zerossl.com/])
 
 A seguire i comandi OpenSSL utilizzati per creare i certificati client.
 
