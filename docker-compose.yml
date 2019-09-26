@@ -1,0 +1,6 @@
+version: '3.3'
+services:
+  apache-ssl-tls-mutual-authentication:
+    image: amusarra/apache-ssl-tls-mutual-authentication
+    ports: 
+      - "443:10443"
