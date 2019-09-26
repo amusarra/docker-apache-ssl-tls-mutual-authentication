@@ -13,7 +13,7 @@ basato su [Apache HTTP](http://httpd.apache.org/docs/2.4/).
 
 Se sei impaziente allora potresti provare con Play-With-Docker
 
-[![Try in PWD](https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png)](https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/amusarra/docker-apache-ssl-tls-mutual-authentication/master/docker-compose.yaml)
+[![Try in PWD](https://raw.githubusercontent.com/play-with-docker/stacks/master/assets/images/button.png)](https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/amusarra/docker-apache-ssl-tls-mutual-authentication/master/docker-compose.yml)
 
 
 ![](images/iconfinder_note.png)
