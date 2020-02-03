@@ -4,10 +4,14 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.4] - 2020-02-03
+## [1.2.5] - 2020-02-03
 ### Changed
 - Let's Encrypt - Free SSL/TLS Certificates Updated
 - Updated - Copyright year
+
+## [1.2.4] - 2019-09-26
+### Added
+- Added Play-With-Docker button
 
 ## [1.2.3] - 2019-09-07
 ### Added
