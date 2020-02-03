@@ -650,7 +650,7 @@ aprire una [issue](https://github.com/amusarra/docker-apache-ssl-tls-mutual-auth
 ## Project License
 The MIT License (MIT)
 
-Copyright &copy; 2019 Antonio Musarra's Blog - [https://www.dontesta.it](https://www.dontesta.it "Antonio Musarra's Blog"), 
+Copyright &copy; 2020 Antonio Musarra's Blog - [https://www.dontesta.it](https://www.dontesta.it "Antonio Musarra's Blog"), 
 [antonio.musarra@gmail.com](mailto:antonio.musarra@gmail.com "Antonio Musarra Email")
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

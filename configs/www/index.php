@@ -135,7 +135,7 @@
             <div class="media-container-row mbr-white">
                 <div class="col-sm-6 copyright">
                     <p class="mbr-text mbr-fonts-style display-7"><a href="https://www.dontesta.it">
-                        © Copyright 2019 Antonio Musarra's Blog - All Rights Reserved
+                        © Copyright 2020 Antonio Musarra's Blog - All Rights Reserved
                     </a></p>
                 </div>
                 <div class="col-md-6">
@@ -158,6 +158,11 @@
                         <div class="soc-item">
                             <a href="https://www.linkedin.com/in/amusarra/" target="_blank">
                                 <span class="mbr-iconfont mbr-iconfont-social socicon-linkedin socicon"></span>
+                            </a>
+                        </div>
+                        <div class="soc-item">
+                            <a href="https://github.com/amusarra/" target="_blank">
+                                <span class="mbr-iconfont mbr-iconfont-social socicon-github socicon"></span>
                             </a>
                         </div>
                         
