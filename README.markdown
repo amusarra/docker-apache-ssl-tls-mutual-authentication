@@ -23,14 +23,14 @@ Microsoft Windows consiglio la lettura di [Install Docker Desktop for Windows](h
 
 ## 1 - Overview
 Questo è un progetto [docker](https://www.docker.com/) che parte dall'immagine 
-base di [*ubuntu:18.04*](https://hub.docker.com/_/ubuntu), specializzato per 
+base di [*ubuntu:19.10*](https://hub.docker.com/_/ubuntu), specializzato per 
 soddisfare i requisiti minimi per un sistema di mutua autenticazione SSL/TLS.
 
 Il software di base installato è:
 
-* Apache HTTP 2.4 (2.4.29)
-* PHP 7 (7.2.10-0ubuntu0.18.04.1)
-* PHP 7 FPM (FastCGI Process Manager)
+* Apache HTTP 2.4 (2.4.41-1ubuntu1)
+* PHP 7.3 (7.3.11-0ubuntu0.19.10.2)
+* PHP 7.3 FPM (FastCGI Process Manager)
 
 _L'installazione di PHP e del modulo per Apache è del tutto opzionale_. I due 
 moduli sono stati installati esclusivamente per costruire la pagina di atterraggio
@@ -65,10 +65,10 @@ reciproca (o mutua autenticazione).
 ## 2 - Struttura del Docker File
 Cerchiamo di capire quali sono le sezioni più significative del Dockerfile. 
 La prima riga del file (come anticipato in precedenza) fa in modo che il 
-container parta dall'immagine docker *ubuntu:18.04*.
+container parta dall'immagine docker *ubuntu:19.10*.
 
 ```docker
-FROM ubuntu:18.04
+FROM ubuntu:19.10
 ```
 
 A seguire c'è la sezione delle variabili di ambiente che sono prettamente 
@@ -160,7 +160,7 @@ dei package, quindi dell'installazione.
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
-    && apt install -y php php7.2-fpm \
+    && apt install -y php php7.3-fpm \
     && apt install -y curl \
     && apt install -y python3-pip \
     && apt install -y git \
@@ -235,7 +235,7 @@ RUN a2enmod ssl \
     && a2enmod remoteip \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
-    && a2enconf php7.2-fpm \
+    && a2enconf php7.3-fpm \
     && c_rehash /etc/ssl/certs/
 ```
 

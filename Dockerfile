@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:19.10
 
 # Metadata params
 ARG BUILD_DATE
@@ -56,7 +56,7 @@ ENV API_BACKEND_BASE_URL http://127.0.0.1:8000${API_BASE_PATH}
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
-    && apt install -y php php7.2-fpm \
+    && apt install -y php php7.3-fpm \
     && apt install -y curl \
     && apt install -y python3-pip \
     && apt install -y git \
@@ -104,7 +104,7 @@ RUN a2enmod ssl \
     && a2enmod remoteip \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
-    && a2enconf php7.2-fpm \
+    && a2enconf php7.3-fpm \
     && c_rehash /etc/ssl/certs/
 
 ## 
