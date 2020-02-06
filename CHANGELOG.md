@@ -4,6 +4,14 @@ Tutte le modifiche importanti a questo progetto saranno documentate in questo fi
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.6] - 2020-02-06
+### Changed
+- Updated Ubuntu from 18.04 to 19.10
+- Updated Apache HTTP 2.4 to 2.2.41
+- Added ServerTokens and ServerSignature Apache HTTP directive
+- Added Support for TLS v1.3
+- Added Support for Strict Transport Security 
+
 ## [1.2.5] - 2020-02-03
 ### Changed
 - Let's Encrypt - Free SSL/TLS Certificates Updated

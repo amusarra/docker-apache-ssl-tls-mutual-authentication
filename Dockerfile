@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:19.10
 
 # Metadata params
 ARG BUILD_DATE
@@ -37,6 +37,9 @@ ENV APACHE_SSL_LOG_LEVEL info
 ENV APACHE_SSL_VERIFY_CLIENT optional
 ENV APACHE_SSL_SSL_PROXY_ENGINE Off
 ENV APACHE_SSL_PROXY_CHECK_PEER_NAME On
+ENV APACHE_SERVER_SIGNATURE Off
+ENV APACHE_SERVER_TOKENS Prod
+ENV APACHE_HTTP_HEADER_X_POWERED_BY "Apache HTTP 2.4 for SSL/TLS Mutual Authentication (Ver. ${VERSION} - Git URL: ${VCS_URL} - Git Ref: ${VCS_REF})"
 
 # For more info See https://httpd.apache.org/docs/2.4/mod/mod_http2.html
 ENV APACHE_HTTP_PROTOCOLS http/1.1
@@ -53,7 +56,7 @@ ENV API_BACKEND_BASE_URL http://127.0.0.1:8000${API_BASE_PATH}
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
-    && apt install -y php php7.2-fpm \
+    && apt install -y php php7.3-fpm \
     && apt install -y curl \
     && apt install -y python3-pip \
     && apt install -y git \
@@ -101,7 +104,7 @@ RUN a2enmod ssl \
     && a2enmod remoteip \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
-    && a2enconf php7.2-fpm \
+    && a2enconf php7.3-fpm \
     && c_rehash /etc/ssl/certs/
 
 ## 

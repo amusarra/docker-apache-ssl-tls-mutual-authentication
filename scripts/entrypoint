@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Start PHP FPM
-service php7.2-fpm restart
+service php7.3-fpm restart
 
 # Start Gunicorn
 gunicorn httpbin:app -k gevent --access-logfile /var/log/gunicorn-access.log --error-logfile /var/log/gunicorn-error.log --daemon
