@@ -6,7 +6,7 @@ e questo progetto aderisce a [Semantic Versioning](https://semver.org/spec/v2.0.
 
 ## [1.2.7] - 2020-02-06
 ### Changed
-- Disabled the TLSv1.3 protocol for the issue TLS 1.3: cannot perform post-handshake authentication.
+- Disabled the TLSv1.3 protocol for the issue: TLS 1.3: cannot perform post-handshake authentication.
   You can see this issue at this URL https://bugs.chromium.org/p/chromium/issues/detail?id=911653
 
 ## [1.2.6] - 2020-02-06
