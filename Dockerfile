@@ -1,4 +1,4 @@
-FROM ubuntu:19.10
+FROM ubuntu:20.04
 
 # Metadata params
 ARG BUILD_DATE
@@ -56,7 +56,7 @@ ENV API_BACKEND_BASE_URL http://127.0.0.1:8000${API_BASE_PATH}
 # Install services, packages and do cleanup
 RUN apt update \
     && apt install -y apache2 \
-    && apt install -y php php7.3-fpm \
+    && apt install -y php7.4 php7.4-fpm \
     && apt install -y curl \
     && apt install -y python3-pip \
     && apt install -y git \
@@ -86,7 +86,6 @@ COPY scripts/entrypoint /entrypoint
 
 # Set execute flag for entrypoint
 RUN chmod +x /entrypoint \
-    && mkdir /run/php \
     && cd /var/www \
     && chown -R www-data:www-data /var/www/html
 
@@ -104,7 +103,7 @@ RUN a2enmod ssl \
     && a2enmod remoteip \
     && a2ensite default-ssl \
     && a2enconf ssl-params \
-    && a2enconf php7.3-fpm \
+    && a2enconf php7.4-fpm \
     && c_rehash /etc/ssl/certs/
 
 ## 
